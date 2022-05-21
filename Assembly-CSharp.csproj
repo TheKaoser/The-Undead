@@ -36,9 +36,11 @@
     <ImplicitlyExpandDesignTimeFacades>false</ImplicitlyExpandDesignTimeFacades>
   </PropertyGroup>
   <ItemGroup>
+     <Compile Include="Assets\Scripts\Humanity.cs" />
      <Compile Include="Assets\Scripts\Player.cs" />
-     <Compile Include="Assets\Scripts\SmoothCamera.cs" />
+     <Compile Include="Assets\Scripts\SuckCollider.cs" />
      <Compile Include="Assets\Scripts\Enemy.cs" />
+     <Compile Include="Assets\Scripts\SmoothCamera.cs" />
     <Reference Include="UnityEngine">
         <HintPath>C:\Program Files\Unity\Hub\Editor\2021.3.3f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
     </Reference>
@@ -789,8 +791,14 @@
     <Reference Include="Unity.2D.Common.Runtime">
         <HintPath>C:\Users\G531\Desktop\The Undead\Library\ScriptAssemblies\Unity.2D.Common.Runtime.dll</HintPath>
     </Reference>
+    <Reference Include="NavMeshComponentsEditor">
+        <HintPath>C:\Users\G531\Desktop\The Undead\Library\ScriptAssemblies\NavMeshComponentsEditor.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.2D.SpriteShape.Editor">
         <HintPath>C:\Users\G531\Desktop\The Undead\Library\ScriptAssemblies\Unity.2D.SpriteShape.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="NavMeshComponents">
+        <HintPath>C:\Users\G531\Desktop\The Undead\Library\ScriptAssemblies\NavMeshComponents.dll</HintPath>
     </Reference>
     <Reference Include="Unity.2D.Common.Editor">
         <HintPath>C:\Users\G531\Desktop\The Undead\Library\ScriptAssemblies\Unity.2D.Common.Editor.dll</HintPath>
@@ -800,12 +808,6 @@
     </Reference>
     <Reference Include="Unity.VisualScripting.State">
         <HintPath>C:\Users\G531\Desktop\The Undead\Library\ScriptAssemblies\Unity.VisualScripting.State.dll</HintPath>
-    </Reference>
-    <Reference Include="NavMeshComponents">
-        <HintPath>C:\Users\G531\Desktop\The Undead\Library\ScriptAssemblies\NavMeshComponents.dll</HintPath>
-    </Reference>
-    <Reference Include="NavMeshComponentsEditor">
-        <HintPath>C:\Users\G531\Desktop\The Undead\Library\ScriptAssemblies\NavMeshComponentsEditor.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

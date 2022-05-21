@@ -5,10 +5,15 @@ using UnityEngine.AI;
 
 public class Player : MonoBehaviour
 {
+    public Humanity humanity;
+    public GameObject suckCollider;
+    GameObject currentSuckCollider;
     NavMeshAgent agent;
     Animator animator;
+    Vector3 destination;
+    Vector3 direction;
+    public float WALK_SPEED = 3f;
 
-    // Start is called before the first frame update
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -18,39 +23,69 @@ public class Player : MonoBehaviour
         animator = GetComponent<Animator>();
     }
 
-    // Update is called once per frame
     void Update()
     {
-        Vector3 destination = transform.position;
+        MovePlayer();
+        Suck();
+    }
+
+    void MovePlayer()
+    {
+        destination = transform.position;
+        animator.SetBool("isWalking", false);
         if (Input.GetKey(KeyCode.W))
         {
-            destination += new Vector3 (0, 1f, 0);
-            animator.Play("PlayerWalk");
+            destination += new Vector3 (0.01f, WALK_SPEED, 0);
+            animator.SetBool("isWalking", true);
         }
         if (Input.GetKey(KeyCode.S))
         {
-            destination += new Vector3 (0, -1f, 0);
-            animator.Play("PlayerWalk");
+            destination += new Vector3 (-0.01f, -WALK_SPEED, 0);
+            animator.SetBool("isWalking", true);
         }
         if (Input.GetKey(KeyCode.A))
         {
-            destination += new Vector3 (-1f, 0, 0);
+            destination += new Vector3 (-WALK_SPEED, 0, 0);
             transform.localScale = new Vector3(1, 1, 0);
-            animator.Play("PlayerWalk");
+            animator.SetBool("isWalking", true);
         }
         if (Input.GetKey(KeyCode.D))
         {
-            destination += new Vector3 (1f, 0, 0);
+            destination += new Vector3 (WALK_SPEED, 0, 0);
             transform.localScale = new Vector3(-1, 1, 0);
-            animator.Play("PlayerWalk");
+            animator.SetBool("isWalking", true);
         }
-        SetDestination(destination);        
+        agent.SetDestination(destination);
     }
 
-    void SetDestination(Vector3 target)
+    void Suck()
     {
-        var agentDrift = 0.0001f; // minimal
-        var driftPos = target + (Vector3)(agentDrift * Random.insideUnitCircle);
-        agent.SetDestination(driftPos);
+        if (destination != transform.position)
+        {
+            direction = destination;
+        }
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            animator.SetBool("isSucking", true);
+            agent.SetDestination(transform.position);
+
+            float xdif = -direction.x + transform.position.x;
+            float ydif = -direction.y + transform.position.y;
+            float angle = Mathf.Atan2(xdif, ydif) * Mathf.Rad2Deg;
+
+            currentSuckCollider = GameObject.Instantiate(suckCollider, transform.position, Quaternion.Euler(0, 0, -angle));
+        }
+        else if (Input.GetKey(KeyCode.Space))
+        {
+            agent.SetDestination(transform.position);
+        }
+        else if (Input.GetKeyUp(KeyCode.Space))
+        {
+            animator.SetBool("isSucking", false);
+            if (currentSuckCollider)
+            {
+                Destroy(currentSuckCollider.gameObject);
+            }
+        }
     }
 }
