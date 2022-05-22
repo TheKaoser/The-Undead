@@ -14,6 +14,8 @@ public class Player : MonoBehaviour
     Vector3 direction;
     public float WALK_SPEED = 3f;
     bool isSucking = false;
+    SpriteRenderer spriteRenderer;
+    bool isAlive = true;
 
     void Start()
     {
@@ -22,13 +24,17 @@ public class Player : MonoBehaviour
 		agent.updateUpAxis = false;
 
         animator = GetComponent<Animator>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     void Update()
     {
-        PlayerMovement();
-        PlayerRotation();
-        PlayerSuck();
+        if (isAlive)
+        {
+            PlayerMovement();
+            PlayerRotation();
+            PlayerSuck();
+        }
     }
 
     void PlayerMovement()
@@ -112,5 +118,11 @@ public class Player : MonoBehaviour
         }
         yield return new WaitForSeconds(0.333f);
         isSucking = false;
+    }
+
+    public void PlayerDie()
+    {
+        spriteRenderer.enabled = false;
+        isAlive = false;
     }
 }

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class SuckCollider : MonoBehaviour
 {
@@ -8,11 +9,21 @@ public class SuckCollider : MonoBehaviour
     float SUCKING_TIME = 1.5f;
     Dictionary<Collider2D, float> colliders2D = new Dictionary<Collider2D, float>();
     Collider2D suckCollider;
+    EnemySpawner enemySpawner;
 
     void Start()
     {
         humanity = GameObject.Find("Humanity").GetComponent<Humanity>();
+        enemySpawner = GameObject.Find("EnemySpawner").GetComponent<EnemySpawner>();
         suckCollider = GetComponent<Collider2D>();
+
+        StartCoroutine(EnableObstacle());
+    }
+
+    IEnumerator EnableObstacle()
+    {
+        yield return new WaitForSeconds(0.3f);
+        GetComponent<NavMeshObstacle>().enabled = true;
     }
 
     void Update()
@@ -43,14 +54,21 @@ public class SuckCollider : MonoBehaviour
         {
             colliders2D.Remove(deadEnemy);
             Destroy(deadEnemy.gameObject);
+            enemySpawner.NotifyEnemyDead();
         }
     }
 
     void OnTriggerEnter2D(Collider2D col)
     {
-        if(col.gameObject.name == "Enemy")
+        if(col.gameObject.CompareTag("Enemy"))
         {
+            if (colliders2D.ContainsKey(col))
+            {
+                colliders2D.Remove(col);
+            }
             colliders2D.Add(col, SUCKING_TIME);
+            col.GetComponent<NavMeshAgent>().enabled = false;
+            col.GetComponent<Animator>().SetBool("isBeingSucked", true);
         }
     }
 
@@ -59,6 +77,7 @@ public class SuckCollider : MonoBehaviour
         foreach (Collider2D collider2D in colliders2D.Keys)
         {
             collider2D.GetComponent<Enemy>().beingSucked = false;
+            collider2D.GetComponent<NavMeshAgent>().enabled = true;
         }
     }
 }

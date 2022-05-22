@@ -18,4 +18,10 @@ public class Humanity : MonoBehaviour
         humanity = humanity + extraHumanity;
         GetComponent<Text>().text = "HUMANITY: " + humanity;
     }
+    
+    public void ResetHumanity()
+    {
+        humanity = 0;
+        GetComponent<Text>().text = "HUMANITY: " + humanity;
+    }
 }

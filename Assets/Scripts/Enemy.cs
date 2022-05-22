@@ -5,8 +5,8 @@ using UnityEngine.AI;
 
 public class Enemy : MonoBehaviour
 {
-    public GameObject player;
-    public Humanity humanity;
+    GameObject player;
+    Humanity humanity;
     public bool beingSucked = false;
     public int enemyHumanity = 20;
     NavMeshAgent agent;
@@ -14,8 +14,16 @@ public class Enemy : MonoBehaviour
     Vector3 randomDestination;
     Vector3 currentDestination;
 
+    bool isAttacking = false;
+    bool doesDamage = false;
+    bool hasGrabbedPlayer = false;
+    Vector3 attackDirection;
+
     void Start()
     {
+        player = GameObject.FindWithTag("Player");
+        humanity = GameObject.Find("Humanity").GetComponent<Humanity>();
+
         agent = GetComponent<NavMeshAgent>();
         agent.updateRotation = false; 
 		agent.updateUpAxis = false;
@@ -29,38 +37,101 @@ public class Enemy : MonoBehaviour
     {
         EnemyMovement();
         EnemyRotation();
+        AttackPlayer();
+        CheckIfBeingSucked();
     }
 
     void EnemyMovement()
     {
-        if (humanity.humanity > 0 && !beingSucked)
+        if (!isAttacking)
         {
-            agent.speed = 3f;
-            animator.SetBool("Agressive", true);
-            currentDestination = player.transform.position;
+            if (humanity.humanity > 0 && !beingSucked)
+            {
+                agent.speed = 3f;
+                animator.SetBool("isAgressive", true);
+                currentDestination = player.transform.position;
+            }
+            else if (beingSucked)
+            {
+                currentDestination = transform.position;
+            }
+            else
+            {
+                agent.speed = 1f;
+                animator.SetBool("isAgressive", false);
+                currentDestination = randomDestination;
+            }
+            if (agent.enabled)
+            {
+                agent.SetDestination(currentDestination);
+            }
         }
-        else if (beingSucked)
+    }
+
+    void AttackPlayer()
+    {
+        if (Vector3.Distance(player.transform.position, transform.position) < 7.5f && !isAttacking && humanity.humanity > 0 && !beingSucked)
         {
-            currentDestination = transform.position;
+            isAttacking = true;
+            animator.SetBool("isAttacking", true);
+            agent.SetDestination(transform.position);
+            StartCoroutine(Rush());
         }
-        else
+    }
+
+    IEnumerator Rush()
+    {
+        Vector3 destination = transform.position + Vector3.Normalize(player.transform.position - transform.position) * 15f;
+        yield return new WaitForSeconds(0.5f);
+        if (!CheckIfBeingSucked())
         {
-            agent.speed = 1f;
-            animator.SetBool("Agressive", false);
-            currentDestination = transform.position + randomDestination;
+            doesDamage = true;
+            agent.SetDestination(destination);
+            agent.speed = 15f;
+            agent.obstacleAvoidanceType = ObstacleAvoidanceType.NoObstacleAvoidance;
+
+            yield return new WaitForSeconds(1f);
+            doesDamage = false;
+            if (!CheckIfBeingSucked() && !hasGrabbedPlayer)
+            {
+                animator.SetBool("isRecovering", true);
+
+                yield return new WaitForSeconds(0.5f);
+
+                isAttacking = false;
+                animator.SetBool("isRecovering", false);
+                animator.SetBool("isAttacking", false);
+                agent.obstacleAvoidanceType = ObstacleAvoidanceType.HighQualityObstacleAvoidance;
+            }
+        }        
+    }
+
+    bool CheckIfBeingSucked()
+    {
+        if (beingSucked)
+        {
+            animator.SetBool("isAttacking", false);
+            animator.SetBool("isRecovering", false);
+            isAttacking = false;
+            animator.SetBool("isBeingSucked", true);
+            
+            return true;
         }
-        agent.SetDestination(currentDestination);        
+        return false;
     }
 
     void EnemyRotation()
     {
-        if (currentDestination.x < transform.position.x)
+        if (!isAttacking && agent.enabled && !beingSucked)
         {
-            transform.localScale = new Vector3(1, 1, 0);
-        }
-        else
-        {
-            transform.localScale = new Vector3(-1, 1, 0);
+            if (currentDestination.x < transform.position.x)
+            {
+                transform.localScale = new Vector3(1, 1, 0);
+            }
+            else
+            {
+                transform.localScale = new Vector3(-1, 1, 0);
+            }
         }
     }
 
@@ -68,8 +139,31 @@ public class Enemy : MonoBehaviour
     {
         while(true)
         {
-            randomDestination = new Vector3(Random.Range(-100f, 100f), Random.Range(-100f, 100f), transform.position.z);
-            yield return new WaitForSeconds(Random.Range(0f, 2f));
+            randomDestination = new Vector3(Random.Range(-10f, 10f), Random.Range(-10f, 10f), transform.position.z);
+            yield return new WaitForSeconds(Random.Range(1f, 2f));
         }
+    }
+
+    void OnTriggerEnter2D(Collider2D col)
+    {
+        if(col.gameObject.CompareTag("Player") && doesDamage)
+        {
+            agent.SetDestination(transform.position);
+            hasGrabbedPlayer = true;
+            animator.SetBool("isGrabbing", true);
+            animator.SetBool("isAttacking", false);
+            isAttacking = false;
+            agent.obstacleAvoidanceType = ObstacleAvoidanceType.HighQualityObstacleAvoidance;
+            humanity.ResetHumanity();
+            player.GetComponent<Player>().PlayerDie();
+            StartCoroutine(ResetEnemy());
+        }
+    }
+
+    IEnumerator ResetEnemy()
+    {
+        yield return new WaitForSeconds(1f);
+        animator.SetBool("isGrabbing", false);
+        hasGrabbedPlayer = false;
     }
 }
