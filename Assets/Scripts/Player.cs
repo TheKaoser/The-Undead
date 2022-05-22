@@ -13,6 +13,7 @@ public class Player : MonoBehaviour
     Vector3 destination;
     Vector3 direction;
     public float WALK_SPEED = 3f;
+    bool isSucking = false;
 
     void Start()
     {
@@ -25,11 +26,12 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-        MovePlayer();
-        Suck();
+        PlayerMovement();
+        PlayerRotation();
+        PlayerSuck();
     }
 
-    void MovePlayer()
+    void PlayerMovement()
     {
         destination = transform.position;
         animator.SetBool("isWalking", false);
@@ -46,26 +48,42 @@ public class Player : MonoBehaviour
         if (Input.GetKey(KeyCode.A))
         {
             destination += new Vector3 (-WALK_SPEED, 0, 0);
-            transform.localScale = new Vector3(1, 1, 0);
             animator.SetBool("isWalking", true);
         }
         if (Input.GetKey(KeyCode.D))
         {
             destination += new Vector3 (WALK_SPEED, 0, 0);
-            transform.localScale = new Vector3(-1, 1, 0);
             animator.SetBool("isWalking", true);
         }
         agent.SetDestination(destination);
     }
-
-    void Suck()
+    
+    void PlayerRotation()
     {
-        if (destination != transform.position)
+        if (!Input.GetKey(KeyCode.Space))
         {
-            direction = destination;
+            // Save last direction
+            if (destination != transform.position)
+            {
+                direction = destination;
+            }
+
+            if (direction.x < transform.position.x)
+            {
+                transform.localScale = new Vector3(1, 1, 0);
+            }
+            else
+            {
+                transform.localScale = new Vector3(-1, 1, 0);
+            }
         }
+    }
+
+    void PlayerSuck()
+    {
         if (Input.GetKeyDown(KeyCode.Space))
         {
+            isSucking = true;
             animator.SetBool("isSucking", true);
             agent.SetDestination(transform.position);
 
@@ -75,17 +93,24 @@ public class Player : MonoBehaviour
 
             currentSuckCollider = GameObject.Instantiate(suckCollider, transform.position, Quaternion.Euler(0, 0, -angle));
         }
-        else if (Input.GetKey(KeyCode.Space))
+        else if (isSucking)
         {
             agent.SetDestination(transform.position);
         }
-        else if (Input.GetKeyUp(KeyCode.Space))
+        if (Input.GetKeyUp(KeyCode.Space))
         {
-            animator.SetBool("isSucking", false);
-            if (currentSuckCollider)
-            {
-                Destroy(currentSuckCollider.gameObject);
-            }
+            StartCoroutine(StopSucking());
         }
+    }
+
+    IEnumerator StopSucking()
+    {
+        animator.SetBool("isSucking", false);
+        if (currentSuckCollider)
+        {
+            Destroy(currentSuckCollider.gameObject);
+        }
+        yield return new WaitForSeconds(0.333f);
+        isSucking = false;
     }
 }

@@ -11,6 +11,8 @@ public class Enemy : MonoBehaviour
     public int enemyHumanity = 20;
     NavMeshAgent agent;
     Animator animator;
+    Vector3 randomDestination;
+    Vector3 currentDestination;
 
     void Start()
     {
@@ -19,35 +21,55 @@ public class Enemy : MonoBehaviour
 		agent.updateUpAxis = false;
 
         animator = GetComponent<Animator>();
+
+        StartCoroutine(GenerateRandomDestinations());
     }
 
     void Update()
     {
         EnemyMovement();
+        EnemyRotation();
     }
 
     void EnemyMovement()
     {
         if (humanity.humanity > 0 && !beingSucked)
         {
+            agent.speed = 3f;
             animator.SetBool("Agressive", true);
-            agent.SetDestination(player.transform.position);
-            if (player.transform.position.x < transform.position.x)
-            {
-                transform.localScale = new Vector3(1, 1, 0);
-            }
-            else
-            {
-                transform.localScale = new Vector3(-1, 1, 0);
-            }
+            currentDestination = player.transform.position;
         }
         else if (beingSucked)
         {
-            agent.SetDestination(transform.position);
+            currentDestination = transform.position;
         }
         else
         {
+            agent.speed = 1f;
             animator.SetBool("Agressive", false);
+            currentDestination = transform.position + randomDestination;
+        }
+        agent.SetDestination(currentDestination);        
+    }
+
+    void EnemyRotation()
+    {
+        if (currentDestination.x < transform.position.x)
+        {
+            transform.localScale = new Vector3(1, 1, 0);
+        }
+        else
+        {
+            transform.localScale = new Vector3(-1, 1, 0);
+        }
+    }
+
+    IEnumerator GenerateRandomDestinations()
+    {
+        while(true)
+        {
+            randomDestination = new Vector3(Random.Range(-100f, 100f), Random.Range(-100f, 100f), transform.position.z);
+            yield return new WaitForSeconds(Random.Range(0f, 2f));
         }
     }
 }
