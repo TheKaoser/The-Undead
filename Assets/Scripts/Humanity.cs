@@ -10,18 +10,18 @@ public class Humanity : MonoBehaviour
     void Start()
     {
         humanity = 0;
-        GetComponent<Text>().text = "HUMANITY: " + humanity;
+        GetComponent<Text>().text = "UNDEAD";
     }
 
-    public void AddHumanity(int extraHumanity)
+    public void AddHumanity()
     {
-        humanity = humanity + extraHumanity;
+        humanity++;
         GetComponent<Text>().text = "HUMANITY: " + humanity;
     }
     
     public void ResetHumanity()
     {
         humanity = 0;
-        GetComponent<Text>().text = "HUMANITY: " + humanity;
+        GetComponent<Text>().text = "UNDEAD";
     }
 }

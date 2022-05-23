@@ -9,13 +9,14 @@ public class SuckCollider : MonoBehaviour
     float SUCKING_TIME = 1.5f;
     Dictionary<Collider2D, float> colliders2D = new Dictionary<Collider2D, float>();
     Collider2D suckCollider;
-    EnemySpawner enemySpawner;
+    Animator animator;
 
     void Start()
     {
         humanity = GameObject.Find("Humanity").GetComponent<Humanity>();
-        enemySpawner = GameObject.Find("EnemySpawner").GetComponent<EnemySpawner>();
         suckCollider = GetComponent<Collider2D>();
+
+        animator = GetComponent<Animator>();
 
         StartCoroutine(EnableObstacle());
     }
@@ -23,6 +24,7 @@ public class SuckCollider : MonoBehaviour
     IEnumerator EnableObstacle()
     {
         yield return new WaitForSeconds(0.3f);
+        animator.SetBool("isStarted", true);
         GetComponent<NavMeshObstacle>().enabled = true;
     }
 
@@ -46,15 +48,14 @@ public class SuckCollider : MonoBehaviour
             if (colliders2D[suckedEnemy] <= 0)
             {
                 deadEnemies.Add(suckedEnemy);
-                humanity.AddHumanity(suckedEnemy.GetComponent<Enemy>().enemyHumanity);
+                humanity.AddHumanity();
             }
         }
 
         foreach (Collider2D deadEnemy in deadEnemies)
         {
             colliders2D.Remove(deadEnemy);
-            Destroy(deadEnemy.gameObject);
-            enemySpawner.NotifyEnemyDead();
+            deadEnemy.GetComponent<Enemy>().KillEnemy();
         }
     }
 
@@ -76,8 +77,7 @@ public class SuckCollider : MonoBehaviour
     {
         foreach (Collider2D collider2D in colliders2D.Keys)
         {
-            collider2D.GetComponent<Enemy>().beingSucked = false;
-            collider2D.GetComponent<NavMeshAgent>().enabled = true;
+            collider2D.GetComponent<Enemy>().ReleaseEnemy();
         }
     }
 }

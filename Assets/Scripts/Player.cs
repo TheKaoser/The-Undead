@@ -15,7 +15,9 @@ public class Player : MonoBehaviour
     public float WALK_SPEED = 3f;
     bool isSucking = false;
     SpriteRenderer spriteRenderer;
+    BoxCollider2D playerCollider;
     bool isAlive = true;
+    bool canSuck = true;
 
     void Start()
     {
@@ -25,6 +27,7 @@ public class Player : MonoBehaviour
 
         animator = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+        playerCollider = GetComponent<BoxCollider2D>();
     }
 
     void Update()
@@ -87,17 +90,14 @@ public class Player : MonoBehaviour
 
     void PlayerSuck()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) && canSuck)
         {
+            canSuck = false;
             isSucking = true;
             animator.SetBool("isSucking", true);
             agent.SetDestination(transform.position);
 
-            float xdif = -direction.x + transform.position.x;
-            float ydif = -direction.y + transform.position.y;
-            float angle = Mathf.Atan2(xdif, ydif) * Mathf.Rad2Deg;
-
-            currentSuckCollider = GameObject.Instantiate(suckCollider, transform.position, Quaternion.Euler(0, 0, -angle));
+            StartCoroutine(StartSucking());
         }
         else if (isSucking)
         {
@@ -109,20 +109,44 @@ public class Player : MonoBehaviour
         }
     }
 
+    IEnumerator StartSucking()
+    {
+        yield return new WaitForSeconds(0.5f);
+        float xdif = -direction.x + transform.position.x;
+        float ydif = -direction.y + transform.position.y;
+        float angle = Mathf.Atan2(xdif, ydif) * Mathf.Rad2Deg;
+
+        currentSuckCollider = GameObject.Instantiate(suckCollider, transform.position, Quaternion.Euler(0, 0, -angle));
+    }
+
+
     IEnumerator StopSucking()
     {
+        currentSuckCollider.GetComponent<Animator>().SetBool("isFinished", true);
         animator.SetBool("isSucking", false);
+        yield return new WaitForSeconds(0.25f);
         if (currentSuckCollider)
         {
             Destroy(currentSuckCollider.gameObject);
         }
         yield return new WaitForSeconds(0.333f);
         isSucking = false;
+        canSuck = true;
     }
 
     public void PlayerDie()
     {
+        if (currentSuckCollider)
+        {
+            StartCoroutine(StopSucking());
+        }
+        playerCollider.enabled = false;
         spriteRenderer.enabled = false;
         isAlive = false;
     }
+
+    void PlayerRevive()
+    {
+        playerCollider.enabled = true;
+    }    
 }

@@ -785,8 +785,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 649.5748, y: 468.98798}
-  m_SizeDelta: {x: 530.0471, y: 66.024}
+  m_AnchoredPosition: {x: 721.4421, y: 441.5}
+  m_SizeDelta: {x: 380.469, y: 113.651}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1228055392
 MonoBehaviour:
@@ -836,13 +836,13 @@ MonoBehaviour:
     m_BestFit: 0
     m_MinSize: 6
     m_MaxSize: 80
-    m_Alignment: 0
+    m_Alignment: 1
     m_AlignByGeometry: 0
     m_RichText: 1
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: 'HUMANITY:'
+  m_Text: UNDEAD
 --- !u!1 &1265988478
 GameObject:
   m_ObjectHideFlags: 0

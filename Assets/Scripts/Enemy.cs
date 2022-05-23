@@ -8,7 +8,6 @@ public class Enemy : MonoBehaviour
     GameObject player;
     Humanity humanity;
     public bool beingSucked = false;
-    public int enemyHumanity = 20;
     NavMeshAgent agent;
     Animator animator;
     Vector3 randomDestination;
@@ -18,6 +17,8 @@ public class Enemy : MonoBehaviour
     bool doesDamage = false;
     bool hasGrabbedPlayer = false;
     Vector3 attackDirection;
+
+    EnemySpawner enemySpawner;
 
     void Start()
     {
@@ -29,6 +30,8 @@ public class Enemy : MonoBehaviour
 		agent.updateUpAxis = false;
 
         animator = GetComponent<Animator>();
+
+        enemySpawner = GameObject.Find("EnemySpawner").GetComponent<EnemySpawner>();
 
         StartCoroutine(GenerateRandomDestinations());
     }
@@ -70,7 +73,7 @@ public class Enemy : MonoBehaviour
 
     void AttackPlayer()
     {
-        if (Vector3.Distance(player.transform.position, transform.position) < 7.5f && !isAttacking && humanity.humanity > 0 && !beingSucked)
+        if (Vector3.Distance(player.transform.position, transform.position) < 7.5f && !isAttacking && humanity.humanity > 0 && !beingSucked && agent.enabled)
         {
             isAttacking = true;
             animator.SetBool("isAttacking", true);
@@ -165,5 +168,31 @@ public class Enemy : MonoBehaviour
         yield return new WaitForSeconds(1f);
         animator.SetBool("isGrabbing", false);
         hasGrabbedPlayer = false;
+    }
+
+    public void KillEnemy()
+    {
+        StartCoroutine(EnemyDeath());
+    }
+
+    IEnumerator EnemyDeath()
+    {
+        animator.SetBool("isDead", true);
+        yield return new WaitForSeconds(0.75f);
+        enemySpawner.NotifyEnemyDead();
+        Destroy(gameObject);
+    }
+
+    public void ReleaseEnemy()
+    {
+        StartCoroutine(EnemyRelease());
+    }
+    
+    IEnumerator EnemyRelease()
+    {
+        beingSucked = false;
+        animator.SetBool("isBeingSucked", false);
+        yield return new WaitForSeconds(0.75f);
+        agent.enabled = true;
     }
 }
