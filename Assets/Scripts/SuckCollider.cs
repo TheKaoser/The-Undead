@@ -6,10 +6,13 @@ using UnityEngine.AI;
 public class SuckCollider : MonoBehaviour
 {
     Humanity humanity;
-    float SUCKING_TIME = 1.5f;
+    float START_SUCK_ANIMATION = 0.2f;
+    float SUCKING_EFFECT_DURATION = 0.3f;
+    float SUCKING_TIME = 0.75f;
     Dictionary<Collider2D, float> colliders2D = new Dictionary<Collider2D, float>();
     Collider2D suckCollider;
     Animator animator;
+    bool isAbleToSuckNewEnemies;
 
     void Start()
     {
@@ -23,8 +26,15 @@ public class SuckCollider : MonoBehaviour
 
     IEnumerator EnableObstacle()
     {
-        yield return new WaitForSeconds(0.3f);
+        suckCollider.enabled = false;
+        yield return new WaitForSeconds(START_SUCK_ANIMATION);
         animator.SetBool("isStarted", true);
+
+        isAbleToSuckNewEnemies = true;
+        suckCollider.enabled = true;
+        yield return new WaitForSeconds(SUCKING_EFFECT_DURATION);
+        isAbleToSuckNewEnemies = false;
+
         GetComponent<NavMeshObstacle>().enabled = true;
     }
 
@@ -61,7 +71,7 @@ public class SuckCollider : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D col)
     {
-        if(col.gameObject.CompareTag("Enemy"))
+        if(col.gameObject.CompareTag("Enemy") && isAbleToSuckNewEnemies)
         {
             if (colliders2D.ContainsKey(col))
             {

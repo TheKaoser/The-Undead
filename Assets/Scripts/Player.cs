@@ -103,7 +103,7 @@ public class Player : MonoBehaviour
         {
             agent.SetDestination(transform.position);
         }
-        if (Input.GetKeyUp(KeyCode.Space))
+        if (Input.GetKeyUp(KeyCode.Space) && currentSuckCollider)
         {
             StartCoroutine(StopSucking());
         }
@@ -134,12 +134,21 @@ public class Player : MonoBehaviour
         canSuck = true;
     }
 
+    void DestroySucking()
+    {
+        animator.SetBool("isSucking", false);
+        Destroy(currentSuckCollider.gameObject);
+        isSucking = false;
+        canSuck = true;
+    }
+
     public void PlayerDie()
     {
         if (currentSuckCollider)
         {
-            StartCoroutine(StopSucking());
+            DestroySucking();
         }
+        agent.SetDestination(transform.position);
         playerCollider.enabled = false;
         spriteRenderer.enabled = false;
         isAlive = false;
