@@ -5,11 +5,21 @@ using UnityEngine;
 public class SmoothCamera : MonoBehaviour
 {
     public Transform target;
-    public float rotationSpeed=0.1f;
- 
+    float mapWidth = 40f;
+    float mapHeight = 28f;
+    float limitX;
+    float limitY;
+
+    void Start()
+    {
+        float height = GetComponent<Camera>().orthographicSize * 2f;
+        float width  = height * Screen.width / Screen.height;
+        limitX = (mapWidth - width) / 2f;
+        limitY = (mapHeight - height) / 2f;
+    }
+
     void Update ()
     {
-        transform.position = new Vector3(target.transform.position.x, target.transform.position.y, transform.position.z);
-        transform.rotation =  Quaternion.Slerp(transform.rotation, target.rotation, rotationSpeed *  Time.deltaTime);
+        transform.position = new Vector3(Mathf.Clamp(target.transform.position.x, -limitX, limitX), Mathf.Clamp(target.transform.position.y, -limitY, limitY), transform.position.z);
     }
 }
