@@ -14,7 +14,7 @@ public class SuckCollider : MonoBehaviour
     Animator animator;
     bool isAbleToSuckNewEnemies;
 
-    void Start()
+    void Awake()
     {
         humanity = GameObject.Find("Humanity").GetComponent<Humanity>();
         suckCollider = GetComponent<Collider2D>();
@@ -29,7 +29,6 @@ public class SuckCollider : MonoBehaviour
         suckCollider.enabled = false;
         yield return new WaitForSeconds(START_SUCK_ANIMATION);
         animator.SetBool("isStarted", true);
-
         isAbleToSuckNewEnemies = true;
         suckCollider.enabled = true;
         yield return new WaitForSeconds(SUCKING_EFFECT_DURATION);
@@ -53,7 +52,6 @@ public class SuckCollider : MonoBehaviour
 
         foreach (Collider2D suckedEnemy in suckedEnemies)
         {
-            suckedEnemy.GetComponent<Enemy>().beingSucked = true;
             colliders2D[suckedEnemy] -= Time.deltaTime;
             if (colliders2D[suckedEnemy] <= 0)
             {
@@ -78,8 +76,7 @@ public class SuckCollider : MonoBehaviour
                 colliders2D.Remove(col);
             }
             colliders2D.Add(col, SUCKING_TIME);
-            col.GetComponent<NavMeshAgent>().enabled = false;
-            col.GetComponent<Animator>().SetBool("isBeingSucked", true);
+            col.GetComponent<Enemy>().EnemyBeSucked();
         }
     }
 

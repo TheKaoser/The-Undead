@@ -20,6 +20,10 @@ public class Enemy : MonoBehaviour
 
     EnemySpawner enemySpawner;
 
+    float WALK_SPEED = 1f;
+    float RUN_SPEED = 3f;
+    float ATTACK_RANGE = 7.5f;
+
     void Start()
     {
         player = GameObject.FindWithTag("Player");
@@ -41,26 +45,25 @@ public class Enemy : MonoBehaviour
         EnemyMovement();
         EnemyRotation();
         AttackPlayer();
-        CheckIfBeingSucked();
     }
 
     void EnemyMovement()
     {
         if (!isAttacking)
         {
-            if (humanity.humanity > 0 && !beingSucked)
+            if (beingSucked)
             {
-                agent.speed = 3f;
+                currentDestination = player.transform.position;
+            }
+            else if (humanity.humanity > 0)
+            {
+                agent.speed = RUN_SPEED;
                 animator.SetBool("isAgressive", true);
                 currentDestination = player.transform.position;
             }
-            else if (beingSucked)
-            {
-                currentDestination = transform.position;
-            }
             else
             {
-                agent.speed = 1f;
+                agent.speed = WALK_SPEED;
                 animator.SetBool("isAgressive", false);
                 currentDestination = randomDestination;
             }
@@ -73,7 +76,7 @@ public class Enemy : MonoBehaviour
 
     void AttackPlayer()
     {
-        if (Vector3.Distance(player.transform.position, transform.position) < 7.5f && !isAttacking && humanity.humanity > 0 && !beingSucked && agent.enabled)
+        if (Vector3.Distance(player.transform.position, transform.position) < ATTACK_RANGE && !isAttacking && humanity.humanity > 0 && !beingSucked && agent.enabled)
         {
             isAttacking = true;
             animator.SetBool("isAttacking", true);
@@ -86,7 +89,7 @@ public class Enemy : MonoBehaviour
     {
         Vector3 destination = transform.position + Vector3.Normalize(player.transform.position - transform.position) * 15f;
         yield return new WaitForSeconds(0.5f);
-        if (!CheckIfBeingSucked())
+        if (!beingSucked)
         {
             doesDamage = true;
             agent.SetDestination(destination);
@@ -95,7 +98,7 @@ public class Enemy : MonoBehaviour
 
             yield return new WaitForSeconds(1f);
             doesDamage = false;
-            if (!CheckIfBeingSucked() && !hasGrabbedPlayer)
+            if (!beingSucked && !hasGrabbedPlayer)
             {
                 animator.SetBool("isRecovering", true);
 
@@ -109,23 +112,9 @@ public class Enemy : MonoBehaviour
         }        
     }
 
-    bool CheckIfBeingSucked()
-    {
-        if (beingSucked)
-        {
-            animator.SetBool("isAttacking", false);
-            animator.SetBool("isRecovering", false);
-            isAttacking = false;
-            animator.SetBool("isBeingSucked", true);
-            
-            return true;
-        }
-        return false;
-    }
-
     void EnemyRotation()
     {
-        if (!isAttacking && agent.enabled && !beingSucked)
+        if (!isAttacking)
         {
             if (currentDestination.x < transform.position.x)
             {
@@ -155,10 +144,9 @@ public class Enemy : MonoBehaviour
             hasGrabbedPlayer = true;
             animator.SetBool("isGrabbing", true);
             animator.SetBool("isAttacking", false);
-            isAttacking = false;
             agent.obstacleAvoidanceType = ObstacleAvoidanceType.HighQualityObstacleAvoidance;
             humanity.ResetHumanity();
-            player.GetComponent<Player>().PlayerDie();
+            StartCoroutine(player.GetComponent<Player>().PlayerDie(this.gameObject.transform));
             StartCoroutine(ResetEnemy());
         }
     }
@@ -168,6 +156,7 @@ public class Enemy : MonoBehaviour
         yield return new WaitForSeconds(1f);
         animator.SetBool("isGrabbing", false);
         hasGrabbedPlayer = false;
+        isAttacking = false;
     }
 
     public void KillEnemy()
@@ -181,6 +170,17 @@ public class Enemy : MonoBehaviour
         yield return new WaitForSeconds(0.75f);
         enemySpawner.NotifyEnemyDead();
         Destroy(gameObject);
+    }
+
+    public void EnemyBeSucked()
+    {
+        agent.enabled = false;
+        animator.SetBool("isBeingSucked", true);
+        beingSucked = true;
+
+        animator.SetBool("isAttacking", false);
+        animator.SetBool("isRecovering", false);
+        isAttacking = false;
     }
 
     public void ReleaseEnemy()

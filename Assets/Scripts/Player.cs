@@ -16,8 +16,16 @@ public class Player : MonoBehaviour
     bool isSucking = false;
     SpriteRenderer spriteRenderer;
     BoxCollider2D playerCollider;
-    bool isAlive = true;
-    bool canSuck = true;
+    bool isAlive;
+    bool isReadyToRevive;
+
+    enum AnimationDirection
+    {
+        side = 0,
+        up = 1,
+        down = 2
+    }
+    AnimationDirection currentAnimationDirection; 
 
     void Start()
     {
@@ -28,6 +36,9 @@ public class Player : MonoBehaviour
         animator = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         playerCollider = GetComponent<BoxCollider2D>();
+
+        isAlive = false;
+        isReadyToRevive = true;
     }
 
     void Update()
@@ -38,33 +49,53 @@ public class Player : MonoBehaviour
             PlayerRotation();
             PlayerSuck();
         }
+        else
+        {
+            StartCoroutine(PlayerRevive());
+        }
+    }
+
+    IEnumerator PlayerRevive()
+    {
+        if (Input.anyKeyDown && isReadyToRevive)
+        {
+            isReadyToRevive = false;
+            animator.SetBool("isAlive", true);
+            playerCollider.enabled = true;
+            yield return new WaitForSeconds(3f);
+            agent.enabled = true;
+            isAlive = true;
+        }
     }
 
     void PlayerMovement()
     {
         destination = transform.position;
-        animator.SetBool("isWalking", false);
         if (Input.GetKey(KeyCode.W))
         {
             destination += new Vector3 (0.01f, WALK_SPEED, 0);
-            animator.SetBool("isWalking", true);
         }
         if (Input.GetKey(KeyCode.S))
         {
             destination += new Vector3 (-0.01f, -WALK_SPEED, 0);
-            animator.SetBool("isWalking", true);
         }
         if (Input.GetKey(KeyCode.A))
         {
             destination += new Vector3 (-WALK_SPEED, 0, 0);
-            animator.SetBool("isWalking", true);
         }
         if (Input.GetKey(KeyCode.D))
         {
             destination += new Vector3 (WALK_SPEED, 0, 0);
+        }
+        if (agent.enabled)
+        {
+            agent.SetDestination(destination);
             animator.SetBool("isWalking", true);
         }
-        agent.SetDestination(destination);
+        if (destination == transform.position)
+        {
+            animator.SetBool("isWalking", false);
+        }
     }
     
     void PlayerRotation()
@@ -72,10 +103,25 @@ public class Player : MonoBehaviour
         if (!Input.GetKey(KeyCode.Space))
         {
             // Save last direction
-            if (destination != transform.position)
+            if (Mathf.Abs(destination.x - transform.position.x) > 0.1f)
             {
-                direction = destination;
+                currentAnimationDirection = AnimationDirection.side;
+                direction.y = transform.position.y;
+                direction.x = destination.x;
             }
+            else if (destination.y - transform.position.y > 0.1f)
+            {
+                currentAnimationDirection = AnimationDirection.up;
+                direction.x = transform.position.x;
+                direction.y = destination.y;
+            }
+            else if (transform.position.y - destination.y > 0.1f)
+            {
+                currentAnimationDirection = AnimationDirection.down;
+                direction.x = transform.position.x;
+                direction.y = destination.y;
+            }
+            animator.SetInteger("direction", ((int)currentAnimationDirection));
 
             if (direction.x < transform.position.x)
             {
@@ -90,20 +136,11 @@ public class Player : MonoBehaviour
 
     void PlayerSuck()
     {
-        if (Input.GetKeyDown(KeyCode.Space) && canSuck)
+        if (Input.GetKeyDown(KeyCode.Space) && !isSucking)
         {
-            canSuck = false;
-            isSucking = true;
-            animator.SetBool("isSucking", true);
-            agent.SetDestination(transform.position);
-
             StartCoroutine(StartSucking());
         }
-        else if (isSucking)
-        {
-            agent.SetDestination(transform.position);
-        }
-        if (Input.GetKeyUp(KeyCode.Space) && currentSuckCollider)
+        if (Input.GetKeyUp(KeyCode.Space))
         {
             StartCoroutine(StopSucking());
         }
@@ -111,51 +148,56 @@ public class Player : MonoBehaviour
 
     IEnumerator StartSucking()
     {
+        isSucking = true;
+        animator.SetBool("isSucking", true);
+        agent.SetDestination(transform.position);
+        agent.enabled = false;
         yield return new WaitForSeconds(0.5f);
-        float xdif = -direction.x + transform.position.x;
-        float ydif = -direction.y + transform.position.y;
-        float angle = Mathf.Atan2(xdif, ydif) * Mathf.Rad2Deg;
+        if (isAlive && isSucking)
+        {
+            float xdif = -direction.x + transform.position.x;
+            float ydif = -direction.y + transform.position.y;
+            float angle = Mathf.Atan2(xdif, ydif) * Mathf.Rad2Deg;
 
-        currentSuckCollider = GameObject.Instantiate(suckCollider, transform.position, Quaternion.Euler(0, 0, -angle));
+            currentSuckCollider = GameObject.Instantiate(suckCollider, transform.position, Quaternion.Euler(0, 0, -angle));
+        }
     }
-
 
     IEnumerator StopSucking()
     {
-        currentSuckCollider.GetComponent<Animator>().SetBool("isFinished", true);
-        animator.SetBool("isSucking", false);
-        yield return new WaitForSeconds(0.25f);
         if (currentSuckCollider)
         {
-            Destroy(currentSuckCollider.gameObject);
+            currentSuckCollider.GetComponent<Animator>().SetBool("isFinished", true);
         }
-        yield return new WaitForSeconds(0.333f);
-        isSucking = false;
-        canSuck = true;
+        animator.SetBool("isSucking", false);
+        yield return new WaitForSeconds(0.25f);
+        agent.enabled = true;
+        DestroySucking();
     }
 
     void DestroySucking()
     {
         animator.SetBool("isSucking", false);
-        Destroy(currentSuckCollider.gameObject);
         isSucking = false;
-        canSuck = true;
-    }
-
-    public void PlayerDie()
-    {
         if (currentSuckCollider)
         {
-            DestroySucking();
+            Destroy(currentSuckCollider.gameObject);
         }
-        agent.SetDestination(transform.position);
-        playerCollider.enabled = false;
-        spriteRenderer.enabled = false;
-        isAlive = false;
     }
 
-    void PlayerRevive()
+    public IEnumerator PlayerDie(Transform enemy)
     {
-        playerCollider.enabled = true;
-    }    
+        DestroySucking();
+        agent.enabled = false;
+        playerCollider.enabled = false;
+        isAlive = false;
+        // yield return new WaitForSeconds(0.1f);
+        animator.SetBool("isAlive", false);
+        spriteRenderer.enabled = false;
+        transform.position = enemy.position;
+        transform.localScale = enemy.localScale;
+        yield return new WaitForSeconds(1f);
+        spriteRenderer.enabled = true;
+        isReadyToRevive = true;
+    }
 }
