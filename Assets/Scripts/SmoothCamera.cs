@@ -5,8 +5,8 @@ using UnityEngine;
 public class SmoothCamera : MonoBehaviour
 {
     public Transform target;
-    float mapWidth = 40f;
-    float mapHeight = 28f;
+    float mapWidth = 60f;
+    float mapHeight = 40f;
     float limitX;
     float limitY;
 

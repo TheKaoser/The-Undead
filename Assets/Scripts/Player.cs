@@ -8,14 +8,21 @@ public class Player : MonoBehaviour
     public Humanity humanity;
     public GameObject suckCollider;
     GameObject currentSuckCollider;
-    NavMeshAgent agent;
-    Animator animator;
-    Vector3 destination;
-    Vector3 direction;
-    public float WALK_SPEED = 3f;
-    bool isSucking = false;
     SpriteRenderer spriteRenderer;
     BoxCollider2D playerCollider;
+    NavMeshAgent agent;
+    Animator animator;
+
+    Vector3 destination;
+    Vector3 direction;
+    
+    float STEP_DISTANCE = 3f;
+    float AGENT_SPEED = 5f;
+    float sizeSuckCollider = 1f;
+    float DASH_COOLDOWN = 3f;
+    // float dashcurrentCooldown ;
+
+    bool isSucking;
     bool isAlive;
     bool isReadyToRevive;
 
@@ -37,6 +44,7 @@ public class Player : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         playerCollider = GetComponent<BoxCollider2D>();
 
+        isSucking = false;
         isAlive = false;
         isReadyToRevive = true;
     }
@@ -48,6 +56,7 @@ public class Player : MonoBehaviour
             PlayerMovement();
             PlayerRotation();
             PlayerSuck();
+            PlayerCorrectStats();
         }
         else
         {
@@ -73,19 +82,19 @@ public class Player : MonoBehaviour
         destination = transform.position;
         if (Input.GetKey(KeyCode.W))
         {
-            destination += new Vector3 (0.01f, WALK_SPEED, 0);
+            destination += new Vector3 (0.01f, STEP_DISTANCE, 0);
         }
         if (Input.GetKey(KeyCode.S))
         {
-            destination += new Vector3 (-0.01f, -WALK_SPEED, 0);
+            destination += new Vector3 (-0.01f, -STEP_DISTANCE, 0);
         }
         if (Input.GetKey(KeyCode.A))
         {
-            destination += new Vector3 (-WALK_SPEED, 0, 0);
+            destination += new Vector3 (-STEP_DISTANCE, 0, 0);
         }
         if (Input.GetKey(KeyCode.D))
         {
-            destination += new Vector3 (WALK_SPEED, 0, 0);
+            destination += new Vector3 (STEP_DISTANCE, 0, 0);
         }
         if (agent.enabled)
         {
@@ -160,6 +169,7 @@ public class Player : MonoBehaviour
             float angle = Mathf.Atan2(xdif, ydif) * Mathf.Rad2Deg;
 
             currentSuckCollider = GameObject.Instantiate(suckCollider, transform.position, Quaternion.Euler(0, 0, -angle));
+            currentSuckCollider.transform.localScale *= sizeSuckCollider;
         }
     }
 
@@ -191,7 +201,6 @@ public class Player : MonoBehaviour
         agent.enabled = false;
         playerCollider.enabled = false;
         isAlive = false;
-        // yield return new WaitForSeconds(0.1f);
         animator.SetBool("isAlive", false);
         spriteRenderer.enabled = false;
         transform.position = enemy.position;
@@ -199,5 +208,17 @@ public class Player : MonoBehaviour
         yield return new WaitForSeconds(1f);
         spriteRenderer.enabled = true;
         isReadyToRevive = true;
+    }
+
+    void PlayerCorrectStats()
+    {
+        agent.speed = AGENT_SPEED + humanity.humanity * 0.1f;
+        sizeSuckCollider = 1f + humanity.humanity * 0.1f;
+        
+    }
+
+    void PlayerDash()
+    {
+        // if (Input.GetKeyDown(KeyCode.LeftShift) && )
     }
 }

@@ -33,13 +33,16 @@ public class EnemySpawner : MonoBehaviour
             GameObject.Instantiate(zombie, enemyLocation, Quaternion.identity);
             enemies++;
 
+            print (enemies + ", " + humanity.humanity);
+
             int seconds = Mathf.Clamp(enemies * enemyPenalty - humanity.humanity * humanityPenalty, 0, 100);
             timeForNextSpawn = seconds;
-        }    
+        }  
     }
 
     public void NotifyEnemyDead()
     {
         timeForNextSpawn -= enemies * enemyPenalty;
+        enemies--;
     }
 }
