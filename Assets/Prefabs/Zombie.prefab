@@ -98,7 +98,7 @@ NavMeshAgent:
   m_GameObject: {fileID: 3366425478435550099}
   m_Enabled: 1
   m_AgentTypeID: 0
-  m_Radius: 1.01
+  m_Radius: 0.8
   m_Speed: 3
   m_Acceleration: 1000
   avoidancePriority: 50
@@ -107,8 +107,8 @@ NavMeshAgent:
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
   m_AutoRepath: 1
-  m_Height: 4.77
-  m_BaseOffset: 3.02
+  m_Height: 3.32
+  m_BaseOffset: -0.55
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
 --- !u!114 &3366425478435550104
@@ -124,7 +124,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   beingSucked: 0
-  enemyHumanity: 20
 --- !u!95 &3366425478435550105
 Animator:
   serializedVersion: 4
@@ -179,10 +178,10 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.17337036, y: -0.6588088}
+  m_Offset: {x: 0.17337036, y: 1.8789532}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
+    pivot: {x: 0.5, y: 0}
     oldSize: {x: 3.83, y: 6.86}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
@@ -190,5 +189,5 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1.1763859, y: 1.8603823}
+  m_Size: {x: 1.1763859, y: 2.5854573}
   m_EdgeRadius: 0

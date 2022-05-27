@@ -7,22 +7,23 @@ public class Enemy : MonoBehaviour
 {
     GameObject player;
     Humanity humanity;
-    public bool beingSucked = false;
     NavMeshAgent agent;
+    EnemySpawner enemySpawner;
     Animator animator;
+    
     Vector3 randomDestination;
     Vector3 currentDestination;
-
-    bool isAttacking = false;
-    bool doesDamage = false;
-    bool hasGrabbedPlayer = false;
     Vector3 attackDirection;
-
-    EnemySpawner enemySpawner;
 
     float WALK_SPEED = 1f;
     float RUN_SPEED = 3f;
     float ATTACK_RANGE = 7.5f;
+    float RUSH_DISTANCE = 15f;
+    
+    bool beingSucked = false;
+    bool isAttacking = false;
+    bool doesDamage = false;
+    bool hasGrabbedPlayer = false;
 
     void Start()
     {
@@ -87,7 +88,7 @@ public class Enemy : MonoBehaviour
 
     IEnumerator Rush()
     {
-        Vector3 destination = transform.position + Vector3.Normalize(player.transform.position - transform.position) * 15f;
+        Vector3 destination = transform.position + Vector3.Normalize(player.transform.position - transform.position) * RUSH_DISTANCE;
         yield return new WaitForSeconds(0.5f);
         if (!beingSucked)
         {
@@ -174,9 +175,9 @@ public class Enemy : MonoBehaviour
 
     public void EnemyBeSucked()
     {
+        beingSucked = true;
         agent.enabled = false;
         animator.SetBool("isBeingSucked", true);
-        beingSucked = true;
 
         animator.SetBool("isAttacking", false);
         animator.SetBool("isRecovering", false);
@@ -190,9 +191,9 @@ public class Enemy : MonoBehaviour
     
     IEnumerator EnemyRelease()
     {
-        beingSucked = false;
         animator.SetBool("isBeingSucked", false);
         yield return new WaitForSeconds(0.75f);
         agent.enabled = true;
+        beingSucked = false;
     }
 }

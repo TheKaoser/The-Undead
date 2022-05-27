@@ -17,11 +17,15 @@ public class Player : MonoBehaviour
     Vector3 direction;
     
     float STEP_DISTANCE = 3f;
-    float AGENT_SPEED = 5f;
+    float WALK_SPEED = 5f;
+    float ROLL_SPEED = 15f;
+    float ROLL_DISTANCE = 10f;
     float sizeSuckCollider = 1f;
-    float DASH_COOLDOWN = 3f;
-    // float dashcurrentCooldown ;
+    float DASH_COOLDOWN = 1f;
+    float currentDashCooldown;
+    float I_FRAME_TIME = 0.25f;
 
+    bool isRolling;
     bool isSucking;
     bool isAlive;
     bool isReadyToRevive;
@@ -44,6 +48,7 @@ public class Player : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         playerCollider = GetComponent<BoxCollider2D>();
 
+        isRolling = false;
         isSucking = false;
         isAlive = false;
         isReadyToRevive = true;
@@ -53,10 +58,14 @@ public class Player : MonoBehaviour
     {
         if (isAlive)
         {
-            PlayerMovement();
-            PlayerRotation();
-            PlayerSuck();
-            PlayerCorrectStats();
+            if (!isRolling)
+            {
+                PlayerMovement();
+                PlayerRotation();
+                PlayerSuck();
+                PlayerCorrectStats();
+            }
+            StartCoroutine(PlayerDash());
         }
         else
         {
@@ -168,8 +177,16 @@ public class Player : MonoBehaviour
             float ydif = -direction.y + transform.position.y;
             float angle = Mathf.Atan2(xdif, ydif) * Mathf.Rad2Deg;
 
-            currentSuckCollider = GameObject.Instantiate(suckCollider, transform.position, Quaternion.Euler(0, 0, -angle));
+            currentSuckCollider = GameObject.Instantiate(suckCollider, new Vector3 (transform.position.x, transform.position.y + spriteRenderer.bounds.size.y / 2), Quaternion.Euler(0, 0, -angle));
             currentSuckCollider.transform.localScale *= sizeSuckCollider;
+            if (currentAnimationDirection == AnimationDirection.up)
+            {
+                currentSuckCollider.GetComponent<SpriteRenderer>().sortingOrder = 1;
+            }
+            else
+            {
+                currentSuckCollider.GetComponent<SpriteRenderer>().sortingOrder = 2;
+            }
         }
     }
 
@@ -212,13 +229,36 @@ public class Player : MonoBehaviour
 
     void PlayerCorrectStats()
     {
-        agent.speed = AGENT_SPEED + humanity.humanity * 0.1f;
+        agent.speed = WALK_SPEED + humanity.humanity * 0.1f;
         sizeSuckCollider = 1f + humanity.humanity * 0.1f;
         
     }
 
-    void PlayerDash()
+    IEnumerator PlayerDash()
     {
-        // if (Input.GetKeyDown(KeyCode.LeftShift) && )
+        currentDashCooldown -= Time.deltaTime;
+        if (Input.GetKeyDown(KeyCode.LeftShift) && currentDashCooldown <= 0 && !isRolling)
+        {
+            isRolling = true;
+            animator.SetBool("isRolling", true);
+
+            DestroySucking();
+
+            agent.enabled = true;
+            destination = transform.position + Vector3.Normalize(destination - transform.position) * ROLL_DISTANCE;
+            agent.SetDestination(destination);
+            agent.speed = ROLL_SPEED;
+
+            playerCollider.enabled = false;
+            yield return new WaitForSeconds(I_FRAME_TIME);
+            playerCollider.enabled = true;
+
+            animator.SetBool("isRolling", false);
+            yield return new WaitForSeconds(0.65f);
+            agent.speed = WALK_SPEED;
+
+            currentDashCooldown = DASH_COOLDOWN;
+            isRolling = false;
+        }
     }
 }
