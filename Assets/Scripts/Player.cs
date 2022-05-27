@@ -14,16 +14,23 @@ public class Player : MonoBehaviour
     Animator animator;
 
     Vector3 destination;
-    Vector3 direction;
-    
     float STEP_DISTANCE = 3f;
-    float WALK_SPEED = 5f;
+    float INITIAL_WALK_SPEED = 5f;
+    float MAX_WALK_SPEED = 10f;
+    public float currentWalkSpeed;
+
     float ROLL_SPEED = 15f;
     float ROLL_DISTANCE = 10f;
-    float sizeSuckCollider = 1f;
-    float DASH_COOLDOWN = 1f;
-    float currentDashCooldown;
+    
+    float INITIAL_SIZE_SUCK_COLLIDER = 1f;
+    float MAX_SIZE_SUCK_COLLIDER = 2f;
+    public float currentSizeSuckCollider;
+    
     float I_FRAME_TIME = 0.25f;
+    float INITIAL_DASH_COOLDOWN = 1f;
+    float MIN_DASH_COOLDOWN = 0.5f;
+    public float currentDashCooldown;
+    float timeForNextDash;
 
     bool isRolling;
     bool isSucking;
@@ -63,7 +70,6 @@ public class Player : MonoBehaviour
                 PlayerMovement();
                 PlayerRotation();
                 PlayerSuck();
-                PlayerCorrectStats();
             }
             StartCoroutine(PlayerDash());
         }
@@ -82,6 +88,7 @@ public class Player : MonoBehaviour
             playerCollider.enabled = true;
             yield return new WaitForSeconds(3f);
             agent.enabled = true;
+            PlayerCorrectStats();
             isAlive = true;
         }
     }
@@ -124,28 +131,25 @@ public class Player : MonoBehaviour
             if (Mathf.Abs(destination.x - transform.position.x) > 0.1f)
             {
                 currentAnimationDirection = AnimationDirection.side;
-                direction.y = transform.position.y;
-                direction.x = destination.x;
+                destination.y = transform.position.y;
             }
             else if (destination.y - transform.position.y > 0.1f)
             {
                 currentAnimationDirection = AnimationDirection.up;
-                direction.x = transform.position.x;
-                direction.y = destination.y;
+                destination.x = transform.position.x;
             }
             else if (transform.position.y - destination.y > 0.1f)
             {
                 currentAnimationDirection = AnimationDirection.down;
-                direction.x = transform.position.x;
-                direction.y = destination.y;
+                destination.x = transform.position.x;
             }
             animator.SetInteger("direction", ((int)currentAnimationDirection));
 
-            if (direction.x < transform.position.x)
+            if (destination.x < transform.position.x)
             {
                 transform.localScale = new Vector3(1, 1, 0);
             }
-            else
+            else if (destination.x > transform.position.x)
             {
                 transform.localScale = new Vector3(-1, 1, 0);
             }
@@ -173,12 +177,12 @@ public class Player : MonoBehaviour
         yield return new WaitForSeconds(0.5f);
         if (isAlive && isSucking)
         {
-            float xdif = -direction.x + transform.position.x;
-            float ydif = -direction.y + transform.position.y;
+            float xdif = -destination.x + transform.position.x;
+            float ydif = -destination.y + transform.position.y;
             float angle = Mathf.Atan2(xdif, ydif) * Mathf.Rad2Deg;
 
             currentSuckCollider = GameObject.Instantiate(suckCollider, new Vector3 (transform.position.x, transform.position.y + spriteRenderer.bounds.size.y / 2), Quaternion.Euler(0, 0, -angle));
-            currentSuckCollider.transform.localScale *= sizeSuckCollider;
+            currentSuckCollider.transform.localScale *= currentSizeSuckCollider;
             if (currentAnimationDirection == AnimationDirection.up)
             {
                 currentSuckCollider.GetComponent<SpriteRenderer>().sortingOrder = 1;
@@ -227,17 +231,18 @@ public class Player : MonoBehaviour
         isReadyToRevive = true;
     }
 
-    void PlayerCorrectStats()
+    public void PlayerCorrectStats()
     {
-        agent.speed = WALK_SPEED + humanity.humanity * 0.1f;
-        sizeSuckCollider = 1f + humanity.humanity * 0.1f;
-        
+        currentWalkSpeed = Mathf.Clamp(INITIAL_WALK_SPEED + Mathf.Sqrt(humanity.humanity / 4f), INITIAL_WALK_SPEED, MAX_WALK_SPEED);
+        agent.speed = currentWalkSpeed;
+        currentSizeSuckCollider = Mathf.Clamp(INITIAL_SIZE_SUCK_COLLIDER + Mathf.Sqrt(humanity.humanity / 100f), INITIAL_SIZE_SUCK_COLLIDER, MAX_SIZE_SUCK_COLLIDER);
+        currentDashCooldown = Mathf.Clamp(INITIAL_DASH_COOLDOWN - Mathf.Sqrt(humanity.humanity / 400f), MIN_DASH_COOLDOWN, INITIAL_DASH_COOLDOWN);
     }
 
     IEnumerator PlayerDash()
     {
-        currentDashCooldown -= Time.deltaTime;
-        if (Input.GetKeyDown(KeyCode.LeftShift) && currentDashCooldown <= 0 && !isRolling)
+        timeForNextDash -= Time.deltaTime;
+        if (Input.GetKeyDown(KeyCode.LeftShift) && timeForNextDash <= 0 && !isRolling)
         {
             isRolling = true;
             animator.SetBool("isRolling", true);
@@ -255,9 +260,9 @@ public class Player : MonoBehaviour
 
             animator.SetBool("isRolling", false);
             yield return new WaitForSeconds(0.65f);
-            agent.speed = WALK_SPEED;
+            agent.speed = currentWalkSpeed;
 
-            currentDashCooldown = DASH_COOLDOWN;
+            timeForNextDash = currentDashCooldown;
             isRolling = false;
         }
     }

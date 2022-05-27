@@ -139,7 +139,7 @@ public class Enemy : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D col)
     {
-        if(col.gameObject.CompareTag("Player") && doesDamage)
+        if(col.gameObject.CompareTag("Player") && doesDamage && !beingSucked)
         {
             agent.SetDestination(transform.position);
             hasGrabbedPlayer = true;
