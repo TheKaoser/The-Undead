@@ -114,7 +114,9 @@ public class Player : MonoBehaviour
         }
         if (agent.enabled)
         {
-            agent.SetDestination(destination);
+            NavMeshHit hit;
+            NavMesh.Raycast(transform.position, destination, out hit, 1);
+            agent.SetDestination(hit.position);
             animator.SetBool("isWalking", true);
         }
         if (destination == transform.position)
@@ -251,7 +253,9 @@ public class Player : MonoBehaviour
 
             agent.enabled = true;
             destination = transform.position + Vector3.Normalize(destination - transform.position) * ROLL_DISTANCE;
-            agent.SetDestination(destination);
+            NavMeshHit hit;
+            NavMesh.Raycast(transform.position, destination, out hit, 1);
+            agent.SetDestination(hit.position);
             agent.speed = ROLL_SPEED;
 
             playerCollider.enabled = false;
