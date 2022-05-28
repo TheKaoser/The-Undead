@@ -89,11 +89,13 @@ public class Enemy : MonoBehaviour
     IEnumerator Rush()
     {
         Vector3 destination = transform.position + Vector3.Normalize(player.transform.position - transform.position) * RUSH_DISTANCE;
+        doesDamage = true;
         yield return new WaitForSeconds(0.5f);
         if (!beingSucked)
         {
-            doesDamage = true;
-            agent.SetDestination(destination);
+            NavMeshHit hit;
+            NavMesh.Raycast(transform.position, destination, out hit, 1);
+            agent.SetDestination(hit.position);
             agent.speed = 15f;
             agent.obstacleAvoidanceType = ObstacleAvoidanceType.NoObstacleAvoidance;
 
@@ -101,14 +103,12 @@ public class Enemy : MonoBehaviour
             doesDamage = false;
             if (!beingSucked && !hasGrabbedPlayer)
             {
-                animator.SetBool("isRecovering", true);
-
-                yield return new WaitForSeconds(0.5f);
-
-                isAttacking = false;
-                animator.SetBool("isRecovering", false);
                 animator.SetBool("isAttacking", false);
+                animator.SetBool("isRecovering", true);
+                yield return new WaitForSeconds(2f);
+                animator.SetBool("isRecovering", false);
                 agent.obstacleAvoidanceType = ObstacleAvoidanceType.HighQualityObstacleAvoidance;
+                isAttacking = false;
             }
         }        
     }

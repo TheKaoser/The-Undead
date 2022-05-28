@@ -14,6 +14,7 @@ public class Player : MonoBehaviour
     Animator animator;
 
     Vector3 destination;
+    float CORRECTION_MOVEMENT = 0.01f;
     float STEP_DISTANCE = 3f;
     float INITIAL_WALK_SPEED = 5f;
     float MAX_WALK_SPEED = 10f;
@@ -98,11 +99,11 @@ public class Player : MonoBehaviour
         destination = transform.position;
         if (Input.GetKey(KeyCode.W))
         {
-            destination += new Vector3 (0.01f, STEP_DISTANCE, 0);
+            destination += new Vector3 (CORRECTION_MOVEMENT, STEP_DISTANCE, 0);
         }
         if (Input.GetKey(KeyCode.S))
         {
-            destination += new Vector3 (-0.01f, -STEP_DISTANCE, 0);
+            destination += new Vector3 (-CORRECTION_MOVEMENT, -STEP_DISTANCE, 0);
         }
         if (Input.GetKey(KeyCode.A))
         {
@@ -255,7 +256,12 @@ public class Player : MonoBehaviour
             destination = transform.position + Vector3.Normalize(destination - transform.position) * ROLL_DISTANCE;
             NavMeshHit hit;
             NavMesh.Raycast(transform.position, destination, out hit, 1);
-            agent.SetDestination(hit.position);
+            destination = hit.position;
+            if (destination.x - transform.position.x == 0)
+            {
+                destination = new Vector3(transform.position.x + CORRECTION_MOVEMENT, destination.y);
+            }
+            agent.SetDestination(destination);
             agent.speed = ROLL_SPEED;
 
             playerCollider.enabled = false;

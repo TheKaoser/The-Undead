@@ -37,7 +37,7 @@ public class EnemySpawner : MonoBehaviour
             float rateHumanity = 1f - Mathf.Sqrt(humanity.humanity / 50f);
             float rateEnemies = Mathf.Sqrt(enemies / 20f);
             float totalRate = rateHumanity * 0.2f + rateEnemies * 0.8f;
-            print (rateHumanity * 0.2f + ", " + rateEnemies * 0.8f + ": " + totalRate);
+            // print (rateHumanity * 0.2f + ", " + rateEnemies * 0.8f + ": " + totalRate);
 
             timeForNextSpawn = totalRate * RESPAWN_TIME;
 
