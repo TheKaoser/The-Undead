@@ -94,7 +94,7 @@ public class Enemy : MonoBehaviour
         if (!beingSucked)
         {
             NavMeshHit hit;
-            NavMesh.Raycast(transform.position, destination, out hit, 1);
+            NavMesh.Raycast(transform.position, destination, out hit, NavMesh.AllAreas);
             agent.SetDestination(hit.position);
             agent.speed = 15f;
             agent.obstacleAvoidanceType = ObstacleAvoidanceType.NoObstacleAvoidance;
@@ -105,7 +105,7 @@ public class Enemy : MonoBehaviour
             {
                 animator.SetBool("isAttacking", false);
                 animator.SetBool("isRecovering", true);
-                yield return new WaitForSeconds(2f);
+                yield return new WaitForSeconds(1f);
                 animator.SetBool("isRecovering", false);
                 agent.obstacleAvoidanceType = ObstacleAvoidanceType.HighQualityObstacleAvoidance;
                 isAttacking = false;

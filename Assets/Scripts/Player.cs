@@ -33,10 +33,18 @@ public class Player : MonoBehaviour
     public float currentDashCooldown;
     float timeForNextDash;
 
+    int FIRST_FLOOR = 8;
+    int SECOND_FLOOR = 16;
+    int BOTH_FLOORS = 32;
+    int FIRST_FLOOR_AND_BOTH = 40;
+    int SECOND_FLOOR_AND_BOTH = 48;
+
     bool isRolling;
     bool isSucking;
     bool isAlive;
     bool isReadyToRevive;
+    public bool isOnFirstFloor;
+    public bool isOnBothFloors;
 
     enum AnimationDirection
     {
@@ -60,6 +68,7 @@ public class Player : MonoBehaviour
         isSucking = false;
         isAlive = false;
         isReadyToRevive = true;
+        isOnFirstFloor = true;
     }
 
     void Update()
@@ -73,10 +82,26 @@ public class Player : MonoBehaviour
                 PlayerSuck();
             }
             StartCoroutine(PlayerDash());
+            CheckPlayerFloor();
         }
         else
         {
             StartCoroutine(PlayerRevive());
+        }
+    }
+
+    void CheckPlayerFloor()
+    {
+        NavMeshHit navMeshHit;
+        agent.SamplePathPosition(NavMesh.AllAreas, 0f, out navMeshHit);
+
+        if (navMeshHit.mask == BOTH_FLOORS)
+        {
+            isOnBothFloors = true;
+        }
+        else
+        {
+            isOnBothFloors = false;
         }
     }
 
@@ -116,7 +141,7 @@ public class Player : MonoBehaviour
         if (agent.enabled)
         {
             NavMeshHit hit;
-            NavMesh.Raycast(transform.position, destination, out hit, 1);
+            NavMesh.Raycast(transform.position, destination, out hit, NavMesh.AllAreas);
             agent.SetDestination(hit.position);
             animator.SetBool("isWalking", true);
         }
@@ -249,13 +274,14 @@ public class Player : MonoBehaviour
         {
             isRolling = true;
             animator.SetBool("isRolling", true);
+            animator.SetBool("isWalking", false);
 
             DestroySucking();
 
             agent.enabled = true;
             destination = transform.position + Vector3.Normalize(destination - transform.position) * ROLL_DISTANCE;
             NavMeshHit hit;
-            NavMesh.Raycast(transform.position, destination, out hit, 1);
+            NavMesh.Raycast(transform.position, destination, out hit, NavMesh.AllAreas);
             destination = hit.position;
             if (destination.x - transform.position.x == 0)
             {
@@ -269,11 +295,39 @@ public class Player : MonoBehaviour
             playerCollider.enabled = true;
 
             animator.SetBool("isRolling", false);
-            yield return new WaitForSeconds(0.65f);
+            yield return new WaitForSeconds(0.5f);
             agent.speed = currentWalkSpeed;
 
             timeForNextDash = currentDashCooldown;
             isRolling = false;
+        }
+    }
+
+    void OnTriggerEnter2D(Collider2D col)
+    {
+        if(col.gameObject.CompareTag("Link"))
+        {
+            agent.areaMask = NavMesh.AllAreas;
+        }
+    }
+    
+    void OnTriggerExit2D(Collider2D col)
+    {
+        if(col.gameObject.CompareTag("Link"))
+        {
+            NavMeshHit navMeshHit;
+            agent.SamplePathPosition(NavMesh.AllAreas, 0f, out navMeshHit);
+            
+            if (navMeshHit.mask == FIRST_FLOOR)
+            {
+                agent.areaMask = FIRST_FLOOR_AND_BOTH;
+                isOnFirstFloor = true;
+            }
+            else if (navMeshHit.mask == SECOND_FLOOR)
+            {
+                agent.areaMask = SECOND_FLOOR_AND_BOTH;
+                isOnFirstFloor = false;
+            }
         }
     }
 }

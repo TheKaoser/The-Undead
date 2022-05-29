@@ -30,7 +30,7 @@ public class EnemySpawner : MonoBehaviour
                 {
                     enemyLocation = new Vector3(Random.Range(MAP_WEIGHT / 2f, -MAP_WEIGHT / 2f), Random.Range(MAP_HEIGHT / 2f, -MAP_HEIGHT / 2f), 0);
                 }
-                while (Vector3.Distance(enemyLocation, player.transform.position) < 50f && NavMesh.SamplePosition(enemyLocation, out hit, 1.0f, NavMesh.AllAreas));
+                while (Vector3.Distance(enemyLocation, player.transform.position) < 25f && NavMesh.SamplePosition(enemyLocation, out hit, 1.0f, NavMesh.AllAreas));
                 print (Vector3.Distance(enemyLocation, player.transform.position));
                 print (enemyLocation);
 
