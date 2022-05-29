@@ -7,11 +7,20 @@ public class Player : MonoBehaviour
 {
     public Humanity humanity;
     public GameObject suckCollider;
+    public Logo logo;
     GameObject currentSuckCollider;
     SpriteRenderer spriteRenderer;
     BoxCollider2D playerCollider;
     NavMeshAgent agent;
     Animator animator;
+
+    AudioSource audioSource;
+    public AudioClip roll;
+    public AudioClip death;
+    public AudioClip revive;
+    public AudioClip[] steps;
+    public AudioClip suckStart;
+    public AudioClip suckLoop;
 
     Vector3 destination;
     float CORRECTION_MOVEMENT = 0.01f;
@@ -19,6 +28,8 @@ public class Player : MonoBehaviour
     float INITIAL_WALK_SPEED = 5f;
     float MAX_WALK_SPEED = 10f;
     public float currentWalkSpeed;
+    float STEP_COOLDOWN = 0.5f;
+    float currentStepCooldown;
 
     float ROLL_SPEED = 15f;
     float ROLL_DISTANCE = 10f;
@@ -63,6 +74,7 @@ public class Player : MonoBehaviour
         animator = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         playerCollider = GetComponent<BoxCollider2D>();
+        audioSource = GetComponent<AudioSource>();
 
         isRolling = false;
         isSucking = false;
@@ -81,7 +93,7 @@ public class Player : MonoBehaviour
                 PlayerRotation();
                 PlayerSuck();
             }
-            StartCoroutine(PlayerDash());
+            StartCoroutine(PlayerRoll());
             CheckPlayerFloor();
         }
         else
@@ -114,7 +126,9 @@ public class Player : MonoBehaviour
         {
             isReadyToRevive = false;
             animator.SetBool("isAlive", true);
+            PlayAudio(revive);
             playerCollider.enabled = true;
+            logo.ClearLogo();
             yield return new WaitForSeconds(3f);
             agent.enabled = true;
             PlayerCorrectStats();
@@ -147,6 +161,13 @@ public class Player : MonoBehaviour
             NavMesh.Raycast(transform.position, destination, out hit, NavMesh.AllAreas);
             agent.SetDestination(hit.position);
             animator.SetBool("isWalking", true);
+
+            currentStepCooldown -= Time.deltaTime;
+            if (currentStepCooldown <= 0 && destination != transform.position)
+            {
+                PlayAudio(steps[Random.Range(0,4)]);
+                currentStepCooldown = STEP_COOLDOWN;
+            }
         }
         if (destination == transform.position)
         {
@@ -201,6 +222,7 @@ public class Player : MonoBehaviour
     {
         isSucking = true;
         animator.SetBool("isSucking", true);
+        PlayAudio(suckStart);
         agent.SetDestination(transform.position);
         agent.enabled = false;
         yield return new WaitForSeconds(0.5f);
@@ -220,6 +242,12 @@ public class Player : MonoBehaviour
             {
                 currentSuckCollider.GetComponent<SpriteRenderer>().sortingOrder = 2;
             }
+
+            while (isSucking)
+            {
+                PlayAudio(suckLoop);
+                yield return new WaitForSeconds(3.3f);
+            }
         }
     }
 
@@ -230,6 +258,7 @@ public class Player : MonoBehaviour
             currentSuckCollider.GetComponent<Animator>().SetBool("isFinished", true);
         }
         animator.SetBool("isSucking", false);
+        audioSource.Stop();
         yield return new WaitForSeconds(0.25f);
         agent.enabled = true;
         DestroySucking();
@@ -252,10 +281,12 @@ public class Player : MonoBehaviour
         playerCollider.enabled = false;
         isAlive = false;
         animator.SetBool("isAlive", false);
+        PlayAudio(death);
         spriteRenderer.enabled = false;
         transform.position = enemy.position;
         transform.localScale = enemy.localScale;
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(1.1f);
+        logo.AddLogo();
         spriteRenderer.enabled = true;
         isReadyToRevive = true;
     }
@@ -268,7 +299,7 @@ public class Player : MonoBehaviour
         currentDashCooldown = Mathf.Clamp(INITIAL_DASH_COOLDOWN - Mathf.Sqrt(humanity.humanity / 400f), MIN_DASH_COOLDOWN, INITIAL_DASH_COOLDOWN);
     }
 
-    IEnumerator PlayerDash()
+    IEnumerator PlayerRoll()
     {
         timeForNextDash -= Time.deltaTime;
         if (Input.GetKeyDown(KeyCode.LeftShift) && timeForNextDash <= 0 && !isRolling)
@@ -276,6 +307,8 @@ public class Player : MonoBehaviour
             isRolling = true;
             animator.SetBool("isRolling", true);
             animator.SetBool("isWalking", false);
+
+            PlayAudio(roll);
 
             DestroySucking();
 
@@ -330,5 +363,11 @@ public class Player : MonoBehaviour
                 isOnFirstFloor = false;
             }
         }
+    }
+
+    void PlayAudio (AudioClip audioClip)
+    {
+        audioSource.clip = audioClip;
+        audioSource.Play();
     }
 }

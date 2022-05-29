@@ -10,6 +10,15 @@ public class Enemy : MonoBehaviour
     NavMeshAgent agent;
     EnemySpawner enemySpawner;
     Animator animator;
+
+    AudioSource audioSource;
+    public AudioClip[] rush;
+    public AudioClip agressive;
+    public AudioClip relax;
+    public AudioClip suckSucced;
+
+    // float LOOP_SOUND_COOLDOWN = 0.5f;
+    // float currentLoopSoundCooldown;
     
     Vector3 randomDestination;
     Vector3 currentDestination;
@@ -29,6 +38,8 @@ public class Enemy : MonoBehaviour
     {
         player = GameObject.FindWithTag("Player");
         humanity = GameObject.Find("Humanity").GetComponent<Humanity>();
+
+        audioSource = GetComponent<AudioSource>();
 
         agent = GetComponent<NavMeshAgent>();
         agent.updateRotation = false; 
@@ -81,6 +92,7 @@ public class Enemy : MonoBehaviour
         {
             isAttacking = true;
             animator.SetBool("isAttacking", true);
+            PlayAudio(rush[Random.Range(0,3)]);
             agent.SetDestination(transform.position);
             StartCoroutine(Rush());
         }
@@ -105,7 +117,7 @@ public class Enemy : MonoBehaviour
             {
                 animator.SetBool("isAttacking", false);
                 animator.SetBool("isRecovering", true);
-                yield return new WaitForSeconds(1f);
+                yield return new WaitForSeconds(1.1f);
                 animator.SetBool("isRecovering", false);
                 agent.obstacleAvoidanceType = ObstacleAvoidanceType.HighQualityObstacleAvoidance;
                 isAttacking = false;
@@ -121,7 +133,7 @@ public class Enemy : MonoBehaviour
             {
                 transform.localScale = new Vector3(1, 1, 0);
             }
-            else
+            else if (currentDestination.x > transform.position.x)
             {
                 transform.localScale = new Vector3(-1, 1, 0);
             }
@@ -132,7 +144,10 @@ public class Enemy : MonoBehaviour
     {
         while(true)
         {
-            randomDestination = new Vector3(Random.Range(-10f, 10f), Random.Range(-10f, 10f), transform.position.z);
+            if (!isAttacking)
+            {
+                randomDestination = new Vector3(Random.Range(-10f, 10f), Random.Range(-10f, 10f), transform.position.z);
+            }
             yield return new WaitForSeconds(Random.Range(1f, 2f));
         }
     }
@@ -154,7 +169,7 @@ public class Enemy : MonoBehaviour
 
     IEnumerator ResetEnemy()
     {
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(1.2f);
         animator.SetBool("isGrabbing", false);
         hasGrabbedPlayer = false;
         isAttacking = false;
@@ -168,6 +183,7 @@ public class Enemy : MonoBehaviour
     IEnumerator EnemyDeath()
     {
         animator.SetBool("isDead", true);
+        PlayAudio(suckSucced);
         yield return new WaitForSeconds(0.75f);
         enemySpawner.NotifyEnemyDead();
         Destroy(gameObject);
@@ -195,5 +211,11 @@ public class Enemy : MonoBehaviour
         yield return new WaitForSeconds(0.75f);
         agent.enabled = true;
         beingSucked = false;
+    }
+
+    void PlayAudio (AudioClip audioClip)
+    {
+        audioSource.clip = audioClip;
+        audioSource.Play();
     }
 }

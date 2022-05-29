@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class SmoothCamera : MonoBehaviour
 {
-    public Transform target;
+    public Transform player;
 
     float MAP_WIDTH = 50f;
     float MAP_HEIGHT = 31.5f;
@@ -24,11 +24,11 @@ public class SmoothCamera : MonoBehaviour
         downLimitY = (MAP_HEIGHT - height) / 2f;
         topLimitY = (MAP_HEIGHT + SKY_HEIGHT - height) / 2f;
 
-        playerHeight = target.GetComponent<SpriteRenderer>().bounds.size.y / 2f;
+        playerHeight = player.GetComponent<SpriteRenderer>().bounds.size.y / 2f;
     }
 
     void Update ()
     {
-        transform.position = new Vector3(Mathf.Clamp(target.transform.position.x, -limitX, limitX), playerHeight + Mathf.Clamp(target.transform.position.y, -(downLimitY + playerHeight), topLimitY), transform.position.z);
+        transform.position = new Vector3(Mathf.Clamp(player.transform.position.x, -limitX, limitX), playerHeight + Mathf.Clamp(player.transform.position.y, -(downLimitY + playerHeight), topLimitY), transform.position.z);
     }
 }
