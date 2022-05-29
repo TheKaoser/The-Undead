@@ -92,16 +92,19 @@ public class Player : MonoBehaviour
 
     void CheckPlayerFloor()
     {
-        NavMeshHit navMeshHit;
-        agent.SamplePathPosition(NavMesh.AllAreas, 0f, out navMeshHit);
+        if (agent.enabled)
+        {
+            NavMeshHit navMeshHit;
+            agent.SamplePathPosition(NavMesh.AllAreas, 0f, out navMeshHit);
 
-        if (navMeshHit.mask == BOTH_FLOORS)
-        {
-            isOnBothFloors = true;
-        }
-        else
-        {
-            isOnBothFloors = false;
+            if (navMeshHit.mask == BOTH_FLOORS)
+            {
+                isOnBothFloors = true;
+            }
+            else
+            {
+                isOnBothFloors = false;
+            }
         }
     }
 
@@ -155,11 +158,9 @@ public class Player : MonoBehaviour
     {
         if (!Input.GetKey(KeyCode.Space))
         {
-            // Save last direction
             if (Mathf.Abs(destination.x - transform.position.x) > 0.1f)
             {
                 currentAnimationDirection = AnimationDirection.side;
-                destination.y = transform.position.y;
             }
             else if (destination.y - transform.position.y > 0.1f)
             {
