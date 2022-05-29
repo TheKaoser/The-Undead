@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class EnemySpawner : MonoBehaviour
 {
@@ -9,8 +10,8 @@ public class EnemySpawner : MonoBehaviour
     public GameObject zombie;
     public SpriteRenderer map;
 
-    int MAP_HEIGHT = 50;
-    int MAP_WEIGHT = 30;
+    float MAP_HEIGHT = 50f;
+    float MAP_WEIGHT = 31.5f;
     
     float RESPAWN_TIME = 10f;
     int enemies;
@@ -21,18 +22,22 @@ public class EnemySpawner : MonoBehaviour
         timeForNextSpawn -= Time.deltaTime;
         if (timeForNextSpawn <= 0)
         {
-            while (enemies < 3)
+            do
             {
                 Vector3 enemyLocation;
+                NavMeshHit hit = new NavMeshHit();
                 do
                 {
-                    enemyLocation = new Vector3(Random.Range(MAP_WEIGHT/2, -MAP_WEIGHT/2), Random.Range(MAP_HEIGHT/2, -MAP_HEIGHT/2), 0);
+                    enemyLocation = new Vector3(Random.Range(MAP_WEIGHT / 2f, -MAP_WEIGHT / 2f), Random.Range(MAP_HEIGHT / 2f, -MAP_HEIGHT / 2f), 0);
                 }
-                while (Vector3.Distance(enemyLocation, player.transform.position) < 12f);
+                while (Vector3.Distance(enemyLocation, player.transform.position) < 50f && NavMesh.SamplePosition(enemyLocation, out hit, 1.0f, NavMesh.AllAreas));
+                print (Vector3.Distance(enemyLocation, player.transform.position));
+                print (enemyLocation);
 
                 GameObject.Instantiate(zombie, enemyLocation, Quaternion.identity);
                 enemies++;
             }
+            while (enemies < 3);
 
             float rateHumanity = 1f - Mathf.Sqrt(humanity.humanity / 50f);
             float rateEnemies = Mathf.Sqrt(enemies / 20f);

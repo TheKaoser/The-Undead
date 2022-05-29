@@ -5,21 +5,24 @@ using UnityEngine;
 public class SmoothCamera : MonoBehaviour
 {
     public Transform target;
-    float mapWidth = 50f;
-    float mapHeight = 37f;
+    float MAP_WIDTH = 50f;
+    float MAP_HEIGHT = 31.5f;
+    float SKY_HEIGHT = 10f;
     float limitX;
-    float limitY;
+    float downLimitY;
+    float topLimitY;
 
     void Start()
     {
         float height = GetComponent<Camera>().orthographicSize * 2f;
         float width  = height * Screen.width / Screen.height;
-        limitX = (mapWidth - width) / 2f;
-        limitY = (mapHeight - height) / 2f;
+        limitX = (MAP_WIDTH - width) / 2f;
+        downLimitY = (MAP_HEIGHT - height) / 2f;
+        topLimitY = (MAP_HEIGHT + SKY_HEIGHT - height) / 2f;
     }
 
     void Update ()
     {
-        transform.position = new Vector3(Mathf.Clamp(target.transform.position.x, -limitX, limitX), Mathf.Clamp(target.transform.position.y, -limitY, limitY), transform.position.z);
+        transform.position = new Vector3(Mathf.Clamp(target.transform.position.x, -limitX, limitX), Mathf.Clamp(target.transform.position.y, -downLimitY, topLimitY), transform.position.z);
     }
 }
