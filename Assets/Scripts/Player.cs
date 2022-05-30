@@ -272,10 +272,10 @@ public class Player : MonoBehaviour
 
     public IEnumerator PlayerDie(Transform enemy)
     {
+        isAlive = false;
         DestroySucking();
         agent.enabled = false;
         playerCollider.enabled = false;
-        isAlive = false;
         animator.SetBool("isAlive", false);
         PlayAudio(death);
         spriteRenderer.enabled = false;
