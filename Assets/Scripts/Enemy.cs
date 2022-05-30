@@ -101,16 +101,14 @@ public class Enemy : MonoBehaviour
     IEnumerator Rush()
     {
         Vector3 destination = transform.position + Vector3.Normalize(player.transform.position - transform.position) * RUSH_DISTANCE;
-        doesDamage = true;
         yield return new WaitForSeconds(0.5f);
+        doesDamage = true;
         if (!beingSucked)
         {
             NavMeshHit hit;
             NavMesh.Raycast(transform.position, destination, out hit, NavMesh.AllAreas);
             agent.SetDestination(hit.position);
             agent.speed = 15f;
-            agent.obstacleAvoidanceType = ObstacleAvoidanceType.NoObstacleAvoidance;
-
             yield return new WaitForSeconds(1f);
             doesDamage = false;
             if (!beingSucked && !hasGrabbedPlayer)
@@ -119,7 +117,6 @@ public class Enemy : MonoBehaviour
                 animator.SetBool("isRecovering", true);
                 yield return new WaitForSeconds(1.1f);
                 animator.SetBool("isRecovering", false);
-                agent.obstacleAvoidanceType = ObstacleAvoidanceType.HighQualityObstacleAvoidance;
                 isAttacking = false;
             }
         }        
@@ -156,11 +153,10 @@ public class Enemy : MonoBehaviour
     {
         if(col.gameObject.CompareTag("Player") && doesDamage && !beingSucked)
         {
-            agent.SetDestination(transform.position);
             hasGrabbedPlayer = true;
+            agent.SetDestination(transform.position);
             animator.SetBool("isGrabbing", true);
             animator.SetBool("isAttacking", false);
-            agent.obstacleAvoidanceType = ObstacleAvoidanceType.HighQualityObstacleAvoidance;
             humanity.ResetHumanity();
             StartCoroutine(player.GetComponent<Player>().PlayerDie(this.gameObject.transform));
             StartCoroutine(ResetEnemy());

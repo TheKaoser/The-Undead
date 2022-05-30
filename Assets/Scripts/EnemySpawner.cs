@@ -9,49 +9,40 @@ public class EnemySpawner : MonoBehaviour
     public GameObject player;
     public GameObject zombie;
     public SpriteRenderer map;
-
-    float MAP_HEIGHT = 50f;
-    float MAP_WEIGHT = 31.5f;
+    public GameObject[] spawns;
     
-    float RESPAWN_TIME = 10f;
+    float RESPAWN_TIME = 5f;
+
     int enemies;
     float timeForNextSpawn;
 
     void Update()
     {
         timeForNextSpawn -= Time.deltaTime;
-        if (timeForNextSpawn <= 0)
+        if (timeForNextSpawn <= 0 && player.GetComponent<Player>().isAlive)
         {
             do
             {
-                Vector3 enemyLocation;
-                NavMeshHit hit = new NavMeshHit();
-                do
-                {
-                    enemyLocation = new Vector3(Random.Range(MAP_WEIGHT / 2f, -MAP_WEIGHT / 2f), Random.Range(MAP_HEIGHT / 2f, -MAP_HEIGHT / 2f), 0);
-                }
-                while (Vector3.Distance(enemyLocation, player.transform.position) < 17f || !NavMesh.SamplePosition(enemyLocation, out hit, 1.0f, NavMesh.AllAreas));
-                print (Vector3.Distance(enemyLocation, player.transform.position));
-                print (hit.position);
-
-                GameObject.Instantiate(zombie, hit.position, Quaternion.identity);
+                GameObject.Instantiate(zombie, spawns[Random.Range(0,4)].transform.position, Quaternion.identity);
                 enemies++;
             }
             while (enemies < 3);
 
-            float rateHumanity = 1f - Mathf.Sqrt(humanity.humanity / 50f);
-            float rateEnemies = Mathf.Sqrt(enemies / 20f);
-            float totalRate = rateHumanity * 0.2f + rateEnemies * 0.8f;
-            // print (rateHumanity * 0.2f + ", " + rateEnemies * 0.8f + ": " + totalRate);
-
-            timeForNextSpawn = totalRate * RESPAWN_TIME;
-
+            timeForNextSpawn = CalculateNextSpawn();            
         }  
+    }
+
+    float CalculateNextSpawn()
+    {
+        float rateHumanity = 1f - Mathf.Sqrt(humanity.humanity / 50f);
+        float rateEnemies = Mathf.Sqrt(enemies / 20f);
+        float totalRate = rateHumanity * 0.35f + rateEnemies * 0.65f;
+        return totalRate * RESPAWN_TIME;
     }
 
     public void NotifyEnemyDead()
     {
-        // timeForNextSpawn -= enemies * enemyPenalty;
+        timeForNextSpawn = CalculateNextSpawn() - timeForNextSpawn;
         enemies--;
     }
 }

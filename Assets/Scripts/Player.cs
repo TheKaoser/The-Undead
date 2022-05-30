@@ -34,10 +34,6 @@ public class Player : MonoBehaviour
     float ROLL_SPEED = 15f;
     float ROLL_DISTANCE = 10f;
     
-    float INITIAL_SIZE_SUCK_COLLIDER = 1f;
-    float MAX_SIZE_SUCK_COLLIDER = 2f;
-    public float currentSizeSuckCollider;
-    
     float I_FRAME_TIME = 0.25f;
     float INITIAL_DASH_COOLDOWN = 1f;
     float MIN_DASH_COOLDOWN = 0.5f;
@@ -52,7 +48,7 @@ public class Player : MonoBehaviour
 
     bool isRolling;
     bool isSucking;
-    bool isAlive;
+    public bool isAlive;
     bool isReadyToRevive;
     public bool isOnFirstFloor;
     public bool isOnBothFloors;
@@ -225,15 +221,15 @@ public class Player : MonoBehaviour
         PlayAudio(suckStart);
         agent.SetDestination(transform.position);
         agent.enabled = false;
+        
+        float xdif = -destination.x + transform.position.x;
+        float ydif = -destination.y + transform.position.y;
+        float angle = Mathf.Atan2(xdif, ydif) * Mathf.Rad2Deg;
+        
         yield return new WaitForSeconds(0.5f);
         if (isAlive && isSucking)
         {
-            float xdif = -destination.x + transform.position.x;
-            float ydif = -destination.y + transform.position.y;
-            float angle = Mathf.Atan2(xdif, ydif) * Mathf.Rad2Deg;
-
-            currentSuckCollider = GameObject.Instantiate(suckCollider, new Vector3 (transform.position.x, transform.position.y + spriteRenderer.bounds.size.y / 2), Quaternion.Euler(0, 0, -angle));
-            currentSuckCollider.transform.localScale *= currentSizeSuckCollider;
+            currentSuckCollider = GameObject.Instantiate(suckCollider, new Vector3 (transform.position.x, transform.position.y + spriteRenderer.bounds.size.y / 2 + 0.5f), Quaternion.Euler(0, 0, -angle));
             if (currentAnimationDirection == AnimationDirection.up)
             {
                 currentSuckCollider.GetComponent<SpriteRenderer>().sortingOrder = 1;
@@ -286,7 +282,6 @@ public class Player : MonoBehaviour
         transform.position = enemy.position;
         transform.localScale = enemy.localScale;
         yield return new WaitForSeconds(1.1f);
-        logo.AddLogo();
         spriteRenderer.enabled = true;
         isReadyToRevive = true;
     }
@@ -295,7 +290,6 @@ public class Player : MonoBehaviour
     {
         currentWalkSpeed = Mathf.Clamp(INITIAL_WALK_SPEED + Mathf.Sqrt(humanity.humanity / 4f), INITIAL_WALK_SPEED, MAX_WALK_SPEED);
         agent.speed = currentWalkSpeed;
-        currentSizeSuckCollider = Mathf.Clamp(INITIAL_SIZE_SUCK_COLLIDER + Mathf.Sqrt(humanity.humanity / 100f), INITIAL_SIZE_SUCK_COLLIDER, MAX_SIZE_SUCK_COLLIDER);
         currentDashCooldown = Mathf.Clamp(INITIAL_DASH_COOLDOWN - Mathf.Sqrt(humanity.humanity / 400f), MIN_DASH_COOLDOWN, INITIAL_DASH_COOLDOWN);
     }
 
