@@ -6,12 +6,11 @@ using UnityEngine.AI;
 public class EnemySpawner : MonoBehaviour
 {
     public Humanity humanity;
-    public GameObject player;
     public GameObject zombie;
     public SpriteRenderer map;
     public GameObject[] spawns;
     
-    float RESPAWN_TIME = 5f;
+    float RESPAWN_TIME = 7.5f;
 
     int enemies;
     float timeForNextSpawn;
@@ -19,7 +18,7 @@ public class EnemySpawner : MonoBehaviour
     void Update()
     {
         timeForNextSpawn -= Time.deltaTime;
-        if (timeForNextSpawn <= 0 && player.GetComponent<Player>().isAlive)
+        if (timeForNextSpawn <= 0 && humanity.humanity > 0)
         {
             do
             {
@@ -29,7 +28,7 @@ public class EnemySpawner : MonoBehaviour
             while (enemies < 3);
 
             timeForNextSpawn = CalculateNextSpawn();            
-        }  
+        }
     }
 
     float CalculateNextSpawn()

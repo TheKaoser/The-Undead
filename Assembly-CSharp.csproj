@@ -39,7 +39,6 @@
      <Compile Include="Assets\Scripts\Humanity.cs" />
      <Compile Include="Assets\Scripts\EnemySpawner.cs" />
      <Compile Include="Assets\Scripts\Player.cs" />
-     <Compile Include="Assets\Scripts\Ladders.cs" />
      <Compile Include="Assets\Scripts\Logo.cs" />
      <Compile Include="Assets\Scripts\SuckCollider.cs" />
      <Compile Include="Assets\Scripts\Enemy.cs" />

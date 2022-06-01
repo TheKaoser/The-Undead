@@ -24,7 +24,7 @@ public class Player : MonoBehaviour
 
     Vector3 destination;
     float CORRECTION_MOVEMENT = 0.01f;
-    float STEP_DISTANCE = 3f;
+    float STEP_DISTANCE = 0.75f;
     float INITIAL_WALK_SPEED = 5f;
     float MAX_WALK_SPEED = 10f;
     public float currentWalkSpeed;
@@ -40,18 +40,10 @@ public class Player : MonoBehaviour
     public float currentDashCooldown;
     float timeForNextDash;
 
-    int FIRST_FLOOR = 8;
-    int SECOND_FLOOR = 16;
-    int BOTH_FLOORS = 32;
-    int FIRST_FLOOR_AND_BOTH = 40;
-    int SECOND_FLOOR_AND_BOTH = 48;
-
     bool isRolling;
     bool isSucking;
     public bool isAlive;
     bool isReadyToRevive;
-    public bool isOnFirstFloor;
-    public bool isOnBothFloors;
 
     enum AnimationDirection
     {
@@ -76,7 +68,6 @@ public class Player : MonoBehaviour
         isSucking = false;
         isAlive = false;
         isReadyToRevive = true;
-        isOnFirstFloor = true;
     }
 
     void Update()
@@ -90,29 +81,10 @@ public class Player : MonoBehaviour
                 PlayerSuck();
             }
             StartCoroutine(PlayerRoll());
-            CheckPlayerFloor();
         }
         else
         {
             StartCoroutine(PlayerRevive());
-        }
-    }
-
-    void CheckPlayerFloor()
-    {
-        if (agent.enabled)
-        {
-            NavMeshHit navMeshHit;
-            agent.SamplePathPosition(NavMesh.AllAreas, 0f, out navMeshHit);
-
-            if (navMeshHit.mask == BOTH_FLOORS)
-            {
-                isOnBothFloors = true;
-            }
-            else
-            {
-                isOnBothFloors = false;
-            }
         }
     }
 
@@ -153,9 +125,7 @@ public class Player : MonoBehaviour
         }
         if (agent.enabled)
         {
-            NavMeshHit hit;
-            NavMesh.Raycast(transform.position, destination, out hit, NavMesh.AllAreas);
-            agent.SetDestination(hit.position);
+            agent.SetDestination(destination);
             animator.SetBool("isWalking", true);
 
             currentStepCooldown -= Time.deltaTime;
@@ -239,6 +209,8 @@ public class Player : MonoBehaviour
                 currentSuckCollider.GetComponent<SpriteRenderer>().sortingOrder = 2;
             }
 
+            currentSuckCollider.transform.localScale *= 1.25f;
+
             while (isSucking)
             {
                 PlayAudio(suckLoop);
@@ -310,7 +282,10 @@ public class Player : MonoBehaviour
             destination = transform.position + Vector3.Normalize(destination - transform.position) * ROLL_DISTANCE;
             NavMeshHit hit;
             NavMesh.Raycast(transform.position, destination, out hit, NavMesh.AllAreas);
-            destination = hit.position;
+            if (hit.position != destination)
+            {
+                destination = hit.position;
+            }
             if (destination.x - transform.position.x == 0)
             {
                 destination = new Vector3(transform.position.x + CORRECTION_MOVEMENT, destination.y);
@@ -328,34 +303,6 @@ public class Player : MonoBehaviour
 
             timeForNextDash = currentDashCooldown;
             isRolling = false;
-        }
-    }
-
-    void OnTriggerEnter2D(Collider2D col)
-    {
-        if(col.gameObject.CompareTag("Link"))
-        {
-            agent.areaMask = NavMesh.AllAreas;
-        }
-    }
-    
-    void OnTriggerExit2D(Collider2D col)
-    {
-        if(col.gameObject.CompareTag("Link"))
-        {
-            NavMeshHit navMeshHit;
-            agent.SamplePathPosition(NavMesh.AllAreas, 0f, out navMeshHit);
-            
-            if (navMeshHit.mask == FIRST_FLOOR)
-            {
-                agent.areaMask = FIRST_FLOOR_AND_BOTH;
-                isOnFirstFloor = true;
-            }
-            else if (navMeshHit.mask == SECOND_FLOOR)
-            {
-                agent.areaMask = SECOND_FLOOR_AND_BOTH;
-                isOnFirstFloor = false;
-            }
         }
     }
 

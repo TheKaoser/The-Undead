@@ -234,7 +234,6 @@ GameObject:
   m_Component:
   - component: {fileID: 27269635}
   - component: {fileID: 27269636}
-  - component: {fileID: 27269637}
   m_Layer: 0
   m_Name: ladders01
   m_TagString: Untagged
@@ -309,19 +308,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &27269637
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 27269634}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e81462fee12796e4e9fb0c7c42f2bf03, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  player: {fileID: 227258960}
 --- !u!1 &68095613
 GameObject:
   m_ObjectHideFlags: 0
@@ -852,8 +838,6 @@ MonoBehaviour:
   currentWalkSpeed: 0
   currentDashCooldown: 0
   isAlive: 0
-  isOnFirstFloor: 0
-  isOnBothFloors: 0
 --- !u!212 &227258961
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -1572,7 +1556,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   humanity: {fileID: 1228055392}
-  player: {fileID: 227258959}
   zombie: {fileID: 3366425478435550099, guid: d9ad5a99669567745b17fa026f999b26, type: 3}
   map: {fileID: 1265988481}
   spawns:
@@ -3461,7 +3444,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 14.4524, y: -7.7275}
+  m_AnchoredPosition: {x: 20.46, y: -9.28}
   m_SizeDelta: {x: 9.5726, y: 4.194}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1933223667
