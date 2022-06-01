@@ -10,7 +10,7 @@ public class EnemySpawner : MonoBehaviour
     public SpriteRenderer map;
     public GameObject[] spawns;
     
-    float RESPAWN_TIME = 7.5f;
+    float RESPAWN_TIME = 6.5f;
 
     int enemies;
     float timeForNextSpawn;
@@ -18,7 +18,7 @@ public class EnemySpawner : MonoBehaviour
     void Update()
     {
         timeForNextSpawn -= Time.deltaTime;
-        if (timeForNextSpawn <= 0 && humanity.humanity > 0)
+        if (timeForNextSpawn <= 0 && (humanity.humanity > 0 || enemies < 3))
         {
             do
             {
