@@ -10,11 +10,14 @@ public class SuckCollider : MonoBehaviour
     Animator animator;
     Collider2D suckCollider;
 
+    AudioSource audioSource;
+    public AudioClip suckSucced;
+
     Dictionary<Collider2D, float> colliders2D = new Dictionary<Collider2D, float>();
     
     float START_SUCK_ANIMATION = 0.2f;
     float SUCKING_EFFECT_DURATION = 0.3f;
-    float SUCKING_TIME = 0.75f;
+    float SUCKING_TIME = 0.3f;
     
     bool isAbleToSuckNewEnemies;
 
@@ -25,6 +28,8 @@ public class SuckCollider : MonoBehaviour
         suckCollider = GetComponent<Collider2D>();
 
         animator = GetComponent<Animator>();
+
+        audioSource = GetComponent<AudioSource>();
 
         StartCoroutine(EnableObstacle());
     }
@@ -61,13 +66,14 @@ public class SuckCollider : MonoBehaviour
             if (colliders2D[suckedEnemy] <= 0)
             {
                 deadEnemies.Add(suckedEnemy);
-                humanity.AddHumanity();
+                humanity.AddEnemy();
             }
         }
 
         foreach (Collider2D deadEnemy in deadEnemies)
         {
             colliders2D.Remove(deadEnemy);
+            PlayAudio(suckSucced);
             deadEnemy.GetComponent<Enemy>().KillEnemy();
             player.PlayerCorrectStats();
         }
@@ -92,5 +98,11 @@ public class SuckCollider : MonoBehaviour
         {
             collider2D.GetComponent<Enemy>().ReleaseEnemy();
         }
+    }
+
+    void PlayAudio (AudioClip audioClip)
+    {
+        audioSource.clip = audioClip;
+        audioSource.Play();
     }
 }

@@ -15,17 +15,13 @@ public class Enemy : MonoBehaviour
     public AudioClip[] rush;
     public AudioClip agressive;
     public AudioClip relax;
-    public AudioClip suckSucced;
-
-    // float LOOP_SOUND_COOLDOWN = 0.5f;
-    // float currentLoopSoundCooldown;
     
     Vector3 randomDestination;
     Vector3 currentDestination;
     Vector3 attackDirection;
 
     float WALK_SPEED = 1f;
-    float RUN_SPEED = 3f;
+    float RUN_SPEED = 5f;
     float ATTACK_RANGE = 7.5f;
     float RUSH_DISTANCE = 15f;
     
@@ -179,7 +175,6 @@ public class Enemy : MonoBehaviour
     IEnumerator EnemyDeath()
     {
         animator.SetBool("isDead", true);
-        PlayAudio(suckSucced);
         yield return new WaitForSeconds(0.75f);
         enemySpawner.NotifyEnemyDead();
         Destroy(gameObject);

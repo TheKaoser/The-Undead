@@ -7,14 +7,16 @@ public class SmoothCamera : MonoBehaviour
     public Transform player;
 
     float MAP_WIDTH = 50f;
-    float MAP_HEIGHT = 31.5f;
-    float SKY_HEIGHT = 10f;
+    float MAP_HEIGHT = 34f;
+    float SKY_HEIGHT = 3f;
 
     float limitX;
     float downLimitY;
     float topLimitY;
 
     float playerHeight;
+
+    public bool isMoving;
 
     void Start()
     {
@@ -30,5 +32,13 @@ public class SmoothCamera : MonoBehaviour
     void Update ()
     {
         transform.position = new Vector3(Mathf.Clamp(player.transform.position.x, -limitX, limitX), playerHeight + Mathf.Clamp(player.transform.position.y, -(downLimitY + playerHeight), topLimitY), transform.position.z);
+        if (transform.position.x == -limitX || transform.position.x == limitX)
+        {
+            isMoving = false;
+        }
+        else
+        {
+            isMoving = true;
+        }
     }
 }

@@ -8,7 +8,7 @@ public class EnemySpawner : MonoBehaviour
     public Humanity humanity;
     public GameObject zombie;
     public SpriteRenderer map;
-    public GameObject[] spawns;
+    public Transform[] spawns;
     
     float RESPAWN_TIME = 6.5f;
 
@@ -22,12 +22,12 @@ public class EnemySpawner : MonoBehaviour
         {
             do
             {
-                GameObject.Instantiate(zombie, spawns[Random.Range(0,4)].transform.position, Quaternion.identity);
+                GameObject.Instantiate(zombie, spawns[Random.Range(0, spawns.Length)].transform.position, Quaternion.identity);
                 enemies++;
             }
             while (enemies < 3);
 
-            timeForNextSpawn = CalculateNextSpawn();            
+            timeForNextSpawn = CalculateNextSpawn();
         }
     }
 

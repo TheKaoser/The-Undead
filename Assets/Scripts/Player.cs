@@ -25,10 +25,10 @@ public class Player : MonoBehaviour
     Vector3 destination;
     float CORRECTION_MOVEMENT = 0.01f;
     float STEP_DISTANCE = 0.75f;
-    float INITIAL_WALK_SPEED = 5f;
+    float INITIAL_WALK_SPEED = 6f;
     float MAX_WALK_SPEED = 10f;
     public float currentWalkSpeed;
-    float STEP_COOLDOWN = 0.5f;
+    float STEP_COOLDOWN = 0.4f;
     float currentStepCooldown;
 
     float ROLL_SPEED = 15f;
@@ -260,7 +260,7 @@ public class Player : MonoBehaviour
 
     public void PlayerCorrectStats()
     {
-        currentWalkSpeed = Mathf.Clamp(INITIAL_WALK_SPEED + Mathf.Sqrt(humanity.humanity / 4f), INITIAL_WALK_SPEED, MAX_WALK_SPEED);
+        currentWalkSpeed = Mathf.Clamp(INITIAL_WALK_SPEED + Mathf.Sqrt(humanity.humanity / 10f), INITIAL_WALK_SPEED, MAX_WALK_SPEED);
         agent.speed = currentWalkSpeed;
         currentDashCooldown = Mathf.Clamp(INITIAL_DASH_COOLDOWN - Mathf.Sqrt(humanity.humanity / 400f), MIN_DASH_COOLDOWN, INITIAL_DASH_COOLDOWN);
     }
@@ -268,7 +268,15 @@ public class Player : MonoBehaviour
     IEnumerator PlayerRoll()
     {
         timeForNextDash -= Time.deltaTime;
-        if (Input.GetKeyDown(KeyCode.LeftShift) && timeForNextDash <= 0 && !isRolling)
+        if (timeForNextDash > 0)
+        {
+            spriteRenderer.color = new Color(0.9f, 0.9f, 1f, 1f);
+        }
+        else
+        {
+            spriteRenderer.color = Color.white;
+        }
+        if ((Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.RightShift)) && timeForNextDash <= 0 && !isRolling)
         {
             isRolling = true;
             animator.SetBool("isRolling", true);
@@ -282,7 +290,7 @@ public class Player : MonoBehaviour
             destination = transform.position + Vector3.Normalize(destination - transform.position) * ROLL_DISTANCE;
             NavMeshHit hit;
             NavMesh.Raycast(transform.position, destination, out hit, NavMesh.AllAreas);
-            if (hit.position != destination)
+            if (Vector3.Distance(hit.position, destination) > 0.5f)
             {
                 destination = hit.position;
             }

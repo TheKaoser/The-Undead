@@ -32,7 +32,7 @@ public class Humanity : MonoBehaviour
         }
     }
 
-    public void AddHumanity()
+    public void AddEnemy()
     {
         humanity++;
         GetComponent<Text>().text = "HUMANITY: " + humanity;
@@ -40,6 +40,12 @@ public class Humanity : MonoBehaviour
         {
             PlayAudio(human);
         }
+    }
+    
+    public void AddHumanity(int newHumanity)
+    {
+        humanity += newHumanity;
+        GetComponent<Text>().text = "HUMANITY: " + humanity;
     }
     
     public void ResetHumanity()

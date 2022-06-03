@@ -36,9 +36,12 @@
     <ImplicitlyExpandDesignTimeFacades>false</ImplicitlyExpandDesignTimeFacades>
   </PropertyGroup>
   <ItemGroup>
+     <Compile Include="Assets\Scripts\Soul.cs" />
+     <Compile Include="Assets\Scripts\SoulSpawner.cs" />
      <Compile Include="Assets\Scripts\Humanity.cs" />
      <Compile Include="Assets\Scripts\EnemySpawner.cs" />
      <Compile Include="Assets\Scripts\Player.cs" />
+     <Compile Include="Assets\Scripts\Parallax.cs" />
      <Compile Include="Assets\Scripts\Logo.cs" />
      <Compile Include="Assets\Scripts\SuckCollider.cs" />
      <Compile Include="Assets\Scripts\Enemy.cs" />
