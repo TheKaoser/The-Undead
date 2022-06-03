@@ -46,6 +46,10 @@ public class Humanity : MonoBehaviour
     {
         humanity += newHumanity;
         GetComponent<Text>().text = "HUMANITY: " + humanity;
+        if (humanity == newHumanity)
+        {
+            PlayAudio(human);
+        }
     }
     
     public void ResetHumanity()
