@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class SoulSpawner : MonoBehaviour
 {
+    public Humanity humanity;
     public GameObject soul;
     public Transform[] spawns;
 
@@ -17,7 +18,7 @@ public class SoulSpawner : MonoBehaviour
     void Update()
     {
         timeForNextSpawn -= Time.deltaTime;
-        if (timeForNextSpawn <= 0 && currentSouls < MAX_SOULS)
+        if (timeForNextSpawn <= 0 && currentSouls < MAX_SOULS && humanity.humanity > 0)
         {
             int random; 
             do
@@ -32,7 +33,7 @@ public class SoulSpawner : MonoBehaviour
 
             timeForNextSpawn = RESPAWN_TIME;
         }
-        else if (currentSouls >= MAX_SOULS)
+        else if (currentSouls >= MAX_SOULS || humanity.humanity == 0)
         {
             timeForNextSpawn = RESPAWN_TIME;
         }

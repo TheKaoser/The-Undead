@@ -3258,6 +3258,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2caa7bd7efb17744689f5d8db1d1d725, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  humanity: {fileID: 1228055392}
   soul: {fileID: 5295952867595644681, guid: d24cf22ec5ed57b4eb3f58082d12b0da, type: 3}
   spawns:
   - {fileID: 2061882355}
